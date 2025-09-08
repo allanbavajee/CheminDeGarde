@@ -1,4 +1,5 @@
-/*app/login/page.tsx*/
+/* app/login/page.tsx : page de connexion des utilisateurs */
+
 "use client";
 
 import { useState } from "react";
@@ -17,11 +18,8 @@ export default function LoginPage() {
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setError("Email ou mot de passe incorrect.");
-    } else {
-      router.push("/missions"); // redirection après login
-    }
+    if (error) setError("Email ou mot de passe incorrect.");
+    else router.push("/missions");
   };
 
   return (
