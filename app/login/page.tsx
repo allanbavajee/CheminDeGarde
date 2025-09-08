@@ -1,3 +1,4 @@
+/*app/login/page.tsx*/
 "use client";
 
 import { useState } from "react";
@@ -14,27 +15,19 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError("Email ou mot de passe incorrect.");
     } else {
-      router.push("/missions");
+      router.push("/missions"); // redirection après login
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm"
-      >
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Connexion à CheminDeGarde
-        </h1>
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
+        <h1 className="text-2xl font-bold text-center mb-6">Connexion à CheminDeGarde</h1>
 
         {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
@@ -62,10 +55,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-        >
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
           Se connecter
         </button>
       </form>
