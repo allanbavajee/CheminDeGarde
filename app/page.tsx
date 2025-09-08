@@ -15,7 +15,7 @@ export default function Home() {
       const user = data.user;
 
       if (user) {
-        // 🔎 Vérifier le département
+        // Vérifier le département
         const { data: profile } = await supabase
           .from("users_custom")
           .select("departement")
@@ -25,7 +25,7 @@ export default function Home() {
         if (profile?.departement) {
           router.push(`/${profile.departement.toLowerCase()}`);
         } else {
-          router.push("/missions"); // fallback si pas de département
+          router.push("/login"); // ✅ Pas de département → retour au login
         }
       } else {
         router.push("/login");
