@@ -1,5 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background-color: #f9fafb; /* gris clair */
+  @apply bg-gray-50 text-gray-800;
 }
