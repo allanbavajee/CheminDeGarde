@@ -115,3 +115,69 @@ export default function LouangeForm() {
       {/* Répétition */}
       <label className="block">
         <input
+          type="checkbox"
+          name="repetition"
+          checked={form.repetition}
+          onChange={handleChange}
+        />{" "}
+        Répétition
+      </label>
+      <input
+        type="text"
+        name="detailsRepetition"
+        value={form.detailsRepetition}
+        onChange={handleChange}
+        placeholder="Détails"
+        className="w-full border p-2 rounded"
+      />
+
+      {/* ADP */}
+      <label className="block">
+        <input
+          type="checkbox"
+          name="adp"
+          checked={form.adp}
+          onChange={handleChange}
+        />{" "}
+        Participation à l’ADP
+      </label>
+      <input
+        type="text"
+        name="detailsAdp"
+        value={form.detailsAdp}
+        onChange={handleChange}
+        placeholder="Détails"
+        className="w-full border p-2 rounded"
+      />
+
+      {/* Culte */}
+      <label className="block">
+        <input
+          type="checkbox"
+          name="culte"
+          checked={form.culte}
+          onChange={handleChange}
+        />{" "}
+        Participation au culte
+      </label>
+      <input
+        type="text"
+        name="detailsCulte"
+        value={form.detailsCulte}
+        onChange={handleChange}
+        placeholder="Détails"
+        className="w-full border p-2 rounded"
+      />
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 text-white p-2 rounded"
+      >
+        {loading ? "Enregistrement..." : "Enregistrer"}
+      </button>
+
+      {message && <p className="text-center mt-4">{message}</p>}
+    </form>
+  );
+}
