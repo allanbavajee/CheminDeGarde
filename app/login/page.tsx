@@ -1,9 +1,9 @@
-/* app/login/page.tsx : page de connexion des utilisateurs */
+/* app/login/page.tsx : Page de connexion et redirection par département */
 
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabaseClient";  // ⬅️ corrigé
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -16,10 +16,34 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
+    // 1️⃣ Sign in
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) setError("Email ou mot de passe incorrect.");
-    else router.push("/missions");
+    if (error) {
+      setError("Email ou mot de passe incorrect.");
+      return;
+    }
+
+    const user = data.user;
+    if (!user) {
+      setError("Utilisateur non trouvé.");
+      return;
+    }
+
+    // 2️⃣ Récupérer le département
+    const { data: profile, error: profileError } = await supabase
+      .from("users_custom")
+      .select("departement")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile?.departement) {
+      setError("Département non attribué, contactez l'admin.");
+      return;
+    }
+
+    // 3️⃣ Redirection vers la page du département
+    router.push(`/${profile.departement}`);
   };
 
   return (
