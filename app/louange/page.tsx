@@ -1,183 +1,73 @@
-/* app/louange/page.tsx */
-"use client";
-import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+/* app/louange/page.tsx : Formulaire Louange */
 
-export default function LouangeForm() {
-  const [form, setForm] = useState({
-    priereLundi: false,
-    detailsPriereLundi: "",
-    priereMardi: false,
-    detailsPriereMardi: "",
-    repetition: false,
-    detailsRepetition: "",
-    adp: false,
-    detailsAdp: "",
-    culte: false,
-    detailsCulte: "",
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+
+export default function LouangePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState({
+    lundi: "",
+    mardi: "",
+    repetition: "",
+    adp: "",
+    culte: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.push("/login");
+        return;
+      }
+      setUser(data.user);
+      setLoading(false);
+    };
+    checkUser();
+  }, [router]);
 
-  const handleChange = (e: any) => {
-    const { name, value, type, checked } = e.target;
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+  const handleSubmit = async () => {
+    if (!user) return;
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    const { error } = await supabase.from("louange_reports").insert([
-      {
-        priere_lundi: form.priereLundi,
-        details_priere_lundi: form.detailsPriereLundi,
-        priere_mardi: form.priereMardi,
-        details_priere_mardi: form.detailsPriereMardi,
-        repetition: form.repetition,
-        details_repetition: form.detailsRepetition,
-        adp: form.adp,
-        details_adp: form.detailsAdp,
-        culte: form.culte,
-        details_culte: form.detailsCulte,
-      },
+    const { error } = await supabase.from("louange_feedback").insert([
+      { user_id: user.id, ...feedback }
     ]);
 
-    if (error) {
-      console.error(error);
-      setMessage("❌ Erreur lors de l’enregistrement !");
-    } else {
-      setMessage("✅ Rapport enregistré avec succès !");
-      setForm({
-        priereLundi: false,
-        detailsPriereLundi: "",
-        priereMardi: false,
-        detailsPriereMardi: "",
-        repetition: false,
-        detailsRepetition: "",
-        adp: false,
-        detailsAdp: "",
-        culte: false,
-        detailsCulte: "",
-      });
-    }
-
-    setLoading(false);
+    if (error) alert("Erreur : " + error.message);
+    else alert("✅ Rapport soumis !");
   };
 
+  if (loading) return <p className="text-center mt-10">Chargement...</p>;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 max-w-lg mx-auto">
-      <h2 className="text-xl font-bold text-center">Rapport Louange</h2>
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+      <h1 className="text-xl font-bold mb-4 text-center">Formulaire Louange</h1>
 
-      {/* Temps de prière Lundi */}
-      <label className="block">
-        <input
-          type="checkbox"
-          name="priereLundi"
-          checked={form.priereLundi}
-          onChange={handleChange}
-        />{" "}
-        Temps de prière Lundi
-      </label>
-      <input
-        type="text"
-        name="detailsPriereLundi"
-        value={form.detailsPriereLundi}
-        onChange={handleChange}
-        placeholder="Détails (durée, remarque...)"
-        className="w-full border p-2 rounded"
-      />
-
-      {/* Temps de prière Mardi */}
-      <label className="block">
-        <input
-          type="checkbox"
-          name="priereMardi"
-          checked={form.priereMardi}
-          onChange={handleChange}
-        />{" "}
-        Temps de prière Mardi
-      </label>
-      <input
-        type="text"
-        name="detailsPriereMardi"
-        value={form.detailsPriereMardi}
-        onChange={handleChange}
-        placeholder="Détails"
-        className="w-full border p-2 rounded"
-      />
-
-      {/* Répétition */}
-      <label className="block">
-        <input
-          type="checkbox"
-          name="repetition"
-          checked={form.repetition}
-          onChange={handleChange}
-        />{" "}
-        Répétition
-      </label>
-      <input
-        type="text"
-        name="detailsRepetition"
-        value={form.detailsRepetition}
-        onChange={handleChange}
-        placeholder="Détails"
-        className="w-full border p-2 rounded"
-      />
-
-      {/* ADP */}
-      <label className="block">
-        <input
-          type="checkbox"
-          name="adp"
-          checked={form.adp}
-          onChange={handleChange}
-        />{" "}
-        Participation à l’ADP
-      </label>
-      <input
-        type="text"
-        name="detailsAdp"
-        value={form.detailsAdp}
-        onChange={handleChange}
-        placeholder="Détails"
-        className="w-full border p-2 rounded"
-      />
-
-      {/* Culte */}
-      <label className="block">
-        <input
-          type="checkbox"
-          name="culte"
-          checked={form.culte}
-          onChange={handleChange}
-        />{" "}
-        Participation au culte
-      </label>
-      <input
-        type="text"
-        name="detailsCulte"
-        value={form.detailsCulte}
-        onChange={handleChange}
-        placeholder="Détails"
-        className="w-full border p-2 rounded"
-      />
+      {Object.keys(feedback).map((key) => (
+        <div className="mb-3" key={key}>
+          <label className="block mb-1 capitalize">{key.replace("_", " ")}</label>
+          <input
+            type="text"
+            value={feedback[key as keyof typeof feedback]}
+            onChange={(e) =>
+              setFeedback({ ...feedback, [key]: e.target.value })
+            }
+            className="w-full p-2 border rounded-lg"
+          />
+        </div>
+      ))}
 
       <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white p-2 rounded"
+        onClick={handleSubmit}
+        className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
       >
-        {loading ? "Enregistrement..." : "Enregistrer"}
+        Soumettre
       </button>
-
-      {message && <p className="text-center mt-4">{message}</p>}
-    </form>
+    </div>
   );
 }
