@@ -1,4 +1,5 @@
-/*app/missions/page.tsx*/
+/* app/missions/page.tsx : page des missions assignées, permet de soumettre des rapports */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,24 +13,20 @@ export default function MissionsPage() {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<{ [key: string]: string }>({});
 
-  // Vérification utilisateur connecté
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
       const user = data.user;
-
       if (!user) {
         router.push("/login");
         return;
       }
-
       setUser(user);
       fetchMissions(user.id);
     };
     checkUser();
   }, [router]);
 
-  // Récupérer les missions assignées à l'utilisateur
   const fetchMissions = async (userId: string) => {
     const { data, error } = await supabase
       .from("missions")
@@ -41,17 +38,11 @@ export default function MissionsPage() {
     setLoading(false);
   };
 
-  // Soumettre rapport
   const handleRapport = async (missionId: string, statut: "accomplie" | "non accomplie") => {
     const explication = feedback[missionId] || null;
 
     const { error } = await supabase.from("rapports").insert([
-      {
-        mission_id: missionId,
-        user_id: user.id,
-        statut,
-        explication,
-      },
+      { mission_id: missionId, user_id: user.id, statut, explication },
     ]);
 
     if (!error) {
