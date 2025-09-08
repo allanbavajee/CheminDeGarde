@@ -1,23 +1,7 @@
-/* app/page.tsx : page d'accueil, redirige automatiquement vers login ou missions */
+/* lib/supabaseClient.ts : centralise la connexion à Supabase pour tout le projet */
+import { createClient } from "@supabase/supabase-js";
 
-"use client";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabaseClient";   // ⬅️ corrigé
-
-export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const redirect = async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (user) router.push("/missions");
-      else router.push("/login");
-    };
-    redirect();
-  }, [router]);
-
-  return <p className="text-center mt-10">Redirection...</p>;
-}
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
