@@ -1,3 +1,5 @@
+/* lib/supabaseClient.ts : centralise la connexion à Supabase pour tout le projet */
+
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
