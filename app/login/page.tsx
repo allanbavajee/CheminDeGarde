@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-
-// Config Supabase
-const supabase = createClient(
-  "https://vbxdztukagsoymtdtall.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZieGR6dHVrYWdzb3ltdGR0YWxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMTUzMzMsImV4cCI6MjA3Mjg5MTMzM30.ZYQnnjW39idoWF7RTqHzLqQxBGvi4-d4HdrFF0ExJdE"
-);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +22,7 @@ export default function LoginPage() {
     if (error) {
       setError("Email ou mot de passe incorrect.");
     } else {
-      router.push("/missions"); // Redirection vers la page missions
+      router.push("/missions");
     }
   };
 
@@ -42,9 +36,7 @@ export default function LoginPage() {
           Connexion à CheminDeGarde
         </h1>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Adresse e-mail</label>
