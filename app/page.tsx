@@ -1,3 +1,5 @@
+/* app/page.tsx : page d'accueil, redirige automatiquement vers login ou missions */
+
 "use client";
 
 import { useEffect } from "react";
