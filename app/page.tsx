@@ -1,4 +1,5 @@
-/* app/page.tsx : page d'accueil, redirige automatiquement vers login ou missions */
+/* app/page.tsx : page d'accueil, redirige automatiquement selon login et département */
+
 "use client";
 
 import { useEffect } from "react";
@@ -12,9 +13,25 @@ export default function Home() {
     const redirect = async () => {
       const { data } = await supabase.auth.getUser();
       const user = data.user;
-      if (user) router.push("/missions");
-      else router.push("/login");
+
+      if (user) {
+        // 🔎 Vérifier le département
+        const { data: profile } = await supabase
+          .from("users_custom")
+          .select("departement")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.departement) {
+          router.push(`/${profile.departement.toLowerCase()}`);
+        } else {
+          router.push("/missions"); // fallback si pas de département
+        }
+      } else {
+        router.push("/login");
+      }
     };
+
     redirect();
   }, [router]);
 
