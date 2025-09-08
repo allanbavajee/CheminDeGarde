@@ -1,4 +1,4 @@
-/* app/login/page.tsx : Page de connexion et redirection par département */
+/* app/login/page.tsx : page de connexion des utilisateurs */
 
 "use client";
 
@@ -16,21 +16,19 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    // 1️⃣ Sign in
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (error) {
+    if (error || !data.user) {
       setError("Email ou mot de passe incorrect.");
       return;
     }
 
     const user = data.user;
-    if (!user) {
-      setError("Utilisateur non trouvé.");
-      return;
-    }
 
-    // 2️⃣ Récupérer le département
+    // 🔎 Vérifier le département
     const { data: profile, error: profileError } = await supabase
       .from("users_custom")
       .select("departement")
@@ -42,19 +40,28 @@ export default function LoginPage() {
       return;
     }
 
-    // 3️⃣ Redirection vers la page du département
-    router.push(`/${profile.departement}`);
+    // ✅ Redirection vers le département
+    router.push(`/${profile.departement.toLowerCase()}`);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-6">Connexion à CheminDeGarde</h1>
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm"
+      >
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Connexion à CheminDeGarde
+        </h1>
 
-        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+        )}
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Adresse e-mail</label>
+          <label className="block text-sm font-medium mb-1">
+            Adresse e-mail
+          </label>
           <input
             type="email"
             value={email}
@@ -77,7 +84,10 @@ export default function LoginPage() {
           />
         </div>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           Se connecter
         </button>
       </form>
