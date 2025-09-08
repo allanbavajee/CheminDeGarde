@@ -1,3 +1,4 @@
+/*app/missions/page.tsx*/
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,22 +12,24 @@ export default function MissionsPage() {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<{ [key: string]: string }>({});
 
+  // Vérification utilisateur connecté
   useEffect(() => {
     const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
 
       if (!user) {
         router.push("/login");
-      } else {
-        setUser(user);
-        fetchMissions(user.id);
+        return;
       }
+
+      setUser(user);
+      fetchMissions(user.id);
     };
     checkUser();
   }, [router]);
 
+  // Récupérer les missions assignées à l'utilisateur
   const fetchMissions = async (userId: string) => {
     const { data, error } = await supabase
       .from("missions")
@@ -38,10 +41,8 @@ export default function MissionsPage() {
     setLoading(false);
   };
 
-  const handleRapport = async (
-    missionId: string,
-    statut: "accomplie" | "non accomplie"
-  ) => {
+  // Soumettre rapport
+  const handleRapport = async (missionId: string, statut: "accomplie" | "non accomplie") => {
     const explication = feedback[missionId] || null;
 
     const { error } = await supabase.from("rapports").insert([
@@ -85,9 +86,7 @@ export default function MissionsPage() {
                 placeholder="Expliquez si la mission n'a pas été accomplie..."
                 className="w-full p-2 border rounded-lg text-sm"
                 value={feedback[mission.id] || ""}
-                onChange={(e) =>
-                  setFeedback({ ...feedback, [mission.id]: e.target.value })
-                }
+                onChange={(e) => setFeedback({ ...feedback, [mission.id]: e.target.value })}
               />
             </div>
 
