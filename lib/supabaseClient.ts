@@ -1,4 +1,4 @@
-/* lib/supabaseClient.ts : centralise la connexion à Supabase pour tout le projet */
+/* lib/supabaseClient.ts : centralise la connexion à Supabase */
 
 import { createClient } from "@supabase/supabase-js";
 
