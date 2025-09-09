@@ -1,4 +1,5 @@
 /* app/api/delete-user/route.ts */
+/* app/api/delete-user/route.ts */
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
