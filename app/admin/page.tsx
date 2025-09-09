@@ -1,95 +1,94 @@
 /* app/admin/page.tsx */
+/* app/login/page.tsx : page de connexion des utilisateurs */
+
 "use client";
+
 import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
-export default function AdminPage() {
+export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [nom, setNom] = useState("");
-  const [departement, setDepartement] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleAddUser = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
+    setError("");
 
-    try {
-      const res = await fetch("/api/create-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, nom, departement }),
-      });
+    // Vérifie si l'utilisateur existe dans users_custom
+    const { data: user, error } = await supabase
+      .from("users_custom")
+      .select("id, email, departement") // bien inclure "departement"
+      .eq("email", email)
+      .eq("password", password) // ⚠️ simple password (non hashé)
+      .single();
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur inconnue");
+    console.log("Résultat Supabase:", user, error); // 👀 debug
 
-      setMessage("✅ Utilisateur ajouté avec succès !");
-      setEmail("");
-      setNom("");
-      setDepartement("");
-      setPassword("");
-    } catch (err: any) {
-      setMessage("❌ Erreur ajout: " + err.message);
+    if (error || !user) {
+      setError("Email ou mot de passe incorrect.");
+      return;
     }
+
+    if (!user.departement) {
+      setError("Département non attribué, contactez l’admin.");
+      return;
+    }
+
+    // Redirection automatique vers le département
+    const dept = user.departement.toLowerCase().replace(/\s+/g, "-"); 
+    router.push(`/${dept}`);
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 border rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">Admin – Ajouter un utilisateur</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm"
+      >
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Connexion à CheminDeGarde
+        </h1>
 
-      <form onSubmit={handleAddUser} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Nom complet"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Adresse email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+        )}
 
-        {/* Menu déroulant pour départements */}
-        <select
-          value={departement}
-          onChange={(e) => setDepartement(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Adresse e-mail</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border rounded-lg"
+            placeholder="exemple@email.com"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-1">Mot de passe</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded-lg"
+            placeholder="Votre mot de passe"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
         >
-          <option value="">-- Choisir un département --</option>
-          <option value="Louange">Louange</option>
-          <option value="Intercession">Intercession</option>
-          <option value="Impact Junior/Adso">Impact Junior/Adso</option>
-          <option value="Evangelisation">Evangelisation</option>
-          <option value="Cellule">Cellule</option>
-          <option value="Hotesse">Hotesse</option>
-          <option value="Technique/Comm">Technique/Comm</option>
-          <option value="Moderation">Moderation</option>
-          <option value="Compassion">Compassion</option>
-          <option value="Conseiller">Conseiller</option>
-        </select>
-
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-          Ajouter
+          Se connecter
         </button>
       </form>
-
-      {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );
 }
+
 
