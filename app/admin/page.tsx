@@ -1,114 +1,75 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [email, setEmail] = useState("");
+  const [nom, setNom] = useState("");   // <-- ajouté
   const [departement, setDepartement] = useState("");
-
-  // Charger les utilisateurs
-  const fetchUsers = async () => {
-    const { data, error } = await supabase.from("users_custom").select("*");
-    if (error) {
-      console.error("Erreur fetch:", error.message);
-    } else {
-      setUsers(data || []);
-    }
-  };
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Ajouter un utilisateur
-  const addUser = async () => {
-    if (!email || !departement) {
-      alert("Remplis tous les champs !");
-      return;
-    }
+  async function fetchUsers() {
+    const { data, error } = await supabase.from("users_custom").select("*");
+    if (error) console.error("Erreur fetch:", error);
+    else setUsers(data);
+  }
 
+  async function addUser() {
     const { error } = await supabase
       .from("users_custom")
-      .insert([{ email, departement }]);
-
-    if (error) {
-      alert("Erreur ajout: " + error.message);
-    } else {
+      .insert([{ email, nom, departement }]); // <-- ajouté nom
+    if (error) console.error("Erreur ajout:", error);
+    else {
       setEmail("");
+      setNom("");
       setDepartement("");
       fetchUsers();
     }
-  };
-
-  // Supprimer un utilisateur
-  const deleteUser = async (id: string) => {
-    const { error } = await supabase.from("users_custom").delete().eq("id", id);
-
-    if (error) {
-      alert("Erreur suppression: " + error.message);
-    } else {
-      fetchUsers();
-    }
-  };
+  }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-5 border rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-5 text-center">Admin - Gestion des utilisateurs</h1>
-
-      {/* Formulaire ajout utilisateur */}
-      <div className="mb-6">
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Admin - Gestion des utilisateurs</h1>
+      <div className="space-y-2 mb-6">
+        <input
+          type="text"
+          placeholder="Nom"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+          className="w-full border p-2 rounded"
+        />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Email utilisateur"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 mr-2 rounded w-2/3"
+          className="w-full border p-2 rounded"
         />
-        <select
+        <input
+          type="text"
+          placeholder="Département"
           value={departement}
           onChange={(e) => setDepartement(e.target.value)}
-          className="border p-2 rounded w-1/3"
-        >
-          <option value="">Choisir...</option>
-          <option value="louange">Louange</option>
-          <option value="intercession">Intercession</option>
-          <option value="impact junior/adso">Impact Junior / ADSO</option>
-          <option value="evangelisation">Évangélisation</option>
-          <option value="cellule">Cellule</option>
-          <option value="hotesse">Hôtesse</option>
-          <option value="technique/comm">Technique / Comm</option>
-          <option value="moderation">Modération</option>
-          <option value="compassion">Compassion</option>
-          <option value="conseiller">Conseiller</option>
-          <option value="admin">Admin</option>
-        </select>
+          className="w-full border p-2 rounded"
+        />
         <button
           onClick={addUser}
-          className="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           Ajouter
         </button>
       </div>
 
-      {/* Liste des utilisateurs */}
-      <h2 className="text-xl font-semibold mb-3">Liste des utilisateurs</h2>
-      <ul className="space-y-2">
+      <h2 className="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
+      <ul className="space-y-1">
         {users.map((u) => (
-          <li
-            key={u.id}
-            className="flex justify-between items-center border p-2 rounded"
-          >
-            <span>
-              {u.email} — <b>{u.departement}</b>
-            </span>
-            <button
-              onClick={() => deleteUser(u.id)}
-              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Supprimer
-            </button>
+          <li key={u.id} className="border p-2 rounded">
+            {u.nom} — {u.email} ({u.departement})
           </li>
         ))}
       </ul>
