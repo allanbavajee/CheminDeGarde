@@ -1,6 +1,6 @@
 /* app/louange/page.tsx : page du département Louange */
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 type Evenement = {
@@ -45,6 +45,22 @@ export default function LouangePage() {
 
   const [message, setMessage] = useState("");
 
+  // ✅ Liste des champs obligatoires pour calculer la complétion
+  const requiredFields = [
+    formData.semaine,
+    formData.lundi_presence,
+    formData.mardi_presence,
+    formData.repetition_date,
+    formData.repetition_nombre.toString(),
+    formData.adp_nombre.toString(),
+  ];
+
+  // ✅ Calcul automatique du % de complétion
+  const completion = useMemo(() => {
+    const filled = requiredFields.filter((f) => f && f !== "0").length;
+    return Math.round((filled / requiredFields.length) * 100);
+  }, [formData]);
+
   // Ajout d’un événement dynamique
   const ajouterEvenement = () => {
     setFormData({
@@ -83,7 +99,18 @@ export default function LouangePage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Rapport Louange</h1>
+      <h1 className="text-2xl font-bold mb-2">Rapport Louange</h1>
+
+      {/* ✅ Indicateur de complétion */}
+      <div className="mb-4">
+        <p className="font-medium">Progression : {completion}%</p>
+        <div className="w-full bg-gray-200 rounded h-4 mt-1">
+          <div
+            className="bg-green-500 h-4 rounded"
+            style={{ width: `${completion}%` }}
+          ></div>
+        </div>
+      </div>
 
       {message && <p className="mb-4 text-center">{message}</p>}
 
@@ -290,3 +317,4 @@ export default function LouangePage() {
     </div>
   );
 }
+
