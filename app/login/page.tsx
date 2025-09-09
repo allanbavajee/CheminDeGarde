@@ -16,32 +16,29 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Vérifie si l'utilisateur existe dans users_custom
+    const { data: user, error } = await supabase
+      .from("users_custom")
+      .select("id, email, departement") // bien inclure "departement"
+      .eq("email", email)
+      .eq("password", password) // ⚠️ simple password (non hashé)
+      .single();
 
-    if (error || !data.user) {
+    console.log("Résultat Supabase:", user, error); // 👀 debug
+
+    if (error || !user) {
       setError("Email ou mot de passe incorrect.");
       return;
     }
 
-    const user = data.user;
-
-    // 🔎 Vérifier le département
-    const { data: profile, error: profileError } = await supabase
-      .from("users_custom")
-      .select("departement")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile?.departement) {
-      setError("Département non attribué, contactez l'admin.");
+    if (!user.departement) {
+      setError("Département non attribué, contactez l’admin.");
       return;
     }
 
-    // ✅ Redirection vers le département
-    router.push(`/${profile.departement.toLowerCase()}`);
+    // Redirection automatique vers le département
+    const dept = user.departement.toLowerCase().replace(/\s+/g, "-"); 
+    router.push(`/${dept}`);
   };
 
   return (
@@ -59,9 +56,7 @@ export default function LoginPage() {
         )}
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
-            Adresse e-mail
-          </label>
+          <label className="block text-sm font-medium mb-1">Adresse e-mail</label>
           <input
             type="email"
             value={email}
