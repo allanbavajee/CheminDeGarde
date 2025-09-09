@@ -1,163 +1,95 @@
 /* app/admin/page.tsx */
 "use client";
-
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useState } from "react";
 
 export default function AdminPage() {
-  const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [nom, setNom] = useState("");
   const [departement, setDepartement] = useState("");
-  const [users, setUsers] = useState<any[]>([]);
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-  const departements = [
-    "Louange",
-    "Intercession",
-    "Impact Junior/Adso",
-    "Évangélisation",
-    "Cellule",
-    "Hôtesse",
-    "Technique/Comm",
-    "Modération",
-    "Compassion",
-    "Conseiller",
-  ];
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage("");
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+    try {
+      const res = await fetch("/api/create-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, nom, departement }),
+      });
 
-  async function fetchUsers() {
-    const { data, error } = await supabase.from("users_custom").select("*");
-    if (!error && data) setUsers(data);
-  }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur inconnue");
 
-  async function addUser() {
-    const res = await fetch("/api/create-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nom, email, password, departement }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert("Erreur ajout: " + data.error);
-      return;
+      setMessage("✅ Utilisateur ajouté avec succès !");
+      setEmail("");
+      setNom("");
+      setDepartement("");
+      setPassword("");
+    } catch (err: any) {
+      setMessage("❌ Erreur ajout: " + err.message);
     }
-
-    setNom("");
-    setEmail("");
-    setPassword("");
-    setDepartement("");
-    fetchUsers();
-  }
-
-  async function deleteUser(user_id: string) {
-    if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
-
-    const res = await fetch("/api/delete-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert("Erreur suppression: " + data.error);
-      return;
-    }
-
-    fetchUsers();
-  }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">Administration – Gestion des utilisateurs</h1>
+    <div className="max-w-lg mx-auto mt-10 p-6 border rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold mb-4 text-center">Admin – Ajouter un utilisateur</h1>
 
-      {/* Formulaire ajout utilisateur */}
-      <div className="bg-white p-6 rounded-2xl shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Ajouter un utilisateur</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <input
-            type="text"
-            placeholder="Nom complet"
-            className="p-2 border rounded-lg"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            className="p-2 border rounded-lg"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            className="p-2 border rounded-lg"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <select
-            className="p-2 border rounded-lg"
-            value={departement}
-            onChange={(e) => setDepartement(e.target.value)}
-          >
-            <option value="">Choisir un département</option>
-            {departements.map((dep) => (
-              <option key={dep} value={dep}>
-                {dep}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          onClick={addUser}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+      <form onSubmit={handleAddUser} className="space-y-4">
+        <input
+          type="text"
+          placeholder="Nom complet"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Adresse email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+
+        {/* Menu déroulant pour départements */}
+        <select
+          value={departement}
+          onChange={(e) => setDepartement(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
         >
-          ➕ Ajouter
-        </button>
-      </div>
+          <option value="">-- Choisir un département --</option>
+          <option value="Louange">Louange</option>
+          <option value="Intercession">Intercession</option>
+          <option value="Impact Junior/Adso">Impact Junior/Adso</option>
+          <option value="Evangelisation">Evangelisation</option>
+          <option value="Cellule">Cellule</option>
+          <option value="Hotesse">Hotesse</option>
+          <option value="Technique/Comm">Technique/Comm</option>
+          <option value="Moderation">Moderation</option>
+          <option value="Compassion">Compassion</option>
+          <option value="Conseiller">Conseiller</option>
+        </select>
 
-      {/* Liste des utilisateurs */}
-      <div className="bg-white p-6 rounded-2xl shadow">
-        <h2 className="text-xl font-semibold mb-4">Liste des utilisateurs</h2>
-        {users.length === 0 ? (
-          <p className="text-gray-500">Aucun utilisateur enregistré.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="p-2 border">Nom</th>
-                <th className="p-2 border">Email</th>
-                <th className="p-2 border">Département</th>
-                <th className="p-2 border text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.user_id} className="border-t">
-                  <td className="p-2 border">{u.nom}</td>
-                  <td className="p-2 border">{u.email}</td>
-                  <td className="p-2 border">{u.departement}</td>
-                  <td className="p-2 border text-center">
-                    <button
-                      onClick={() => deleteUser(u.user_id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition"
-                    >
-                      🗑 Supprimer
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+          Ajouter
+        </button>
+      </form>
+
+      {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );
 }
+
