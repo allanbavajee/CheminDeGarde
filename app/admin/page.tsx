@@ -1,27 +1,28 @@
+/* app/admin/page.tsx */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-const departements = [
-  "Louange",
-  "Intercession",
-  "Impact Junior/Adso",
-  "Évangélisation",
-  "Cellule",
-  "Hôtesse",
-  "Technique/Comm",
-  "Modération",
-  "Compassion",
-  "Conseiller",
-];
-
 export default function AdminPage() {
-  const [users, setUsers] = useState<any[]>([]);
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // mot de passe
+  const [password, setPassword] = useState("");
   const [departement, setDepartement] = useState("");
+  const [users, setUsers] = useState<any[]>([]);
+
+  const departements = [
+    "Louange",
+    "Intercession",
+    "Impact Junior/Adso",
+    "Évangélisation",
+    "Cellule",
+    "Hôtesse",
+    "Technique/Comm",
+    "Modération",
+    "Compassion",
+    "Conseiller",
+  ];
 
   useEffect(() => {
     fetchUsers();
@@ -29,109 +30,134 @@ export default function AdminPage() {
 
   async function fetchUsers() {
     const { data, error } = await supabase.from("users_custom").select("*");
-    if (error) console.error("Erreur fetch:", error);
-    else setUsers(data);
+    if (!error && data) setUsers(data);
   }
 
   async function addUser() {
-    // 1. Créer compte avec Auth
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password,
+    const res = await fetch("/api/create-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nom, email, password, departement }),
     });
 
-    if (error) {
-      console.error("Erreur Auth:", error);
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert("Erreur ajout: " + data.error);
       return;
     }
 
-    // 2. Ajouter infos dans users_custom
-    const { error: insertError } = await supabase.from("users_custom").insert([
-      { user_id: data.user.id, nom, email, departement },
-    ]);
-
-    if (insertError) console.error("Erreur insert:", insertError);
-    else {
-      setNom("");
-      setEmail("");
-      setPassword("");
-      setDepartement("");
-      fetchUsers();
-    }
+    setNom("");
+    setEmail("");
+    setPassword("");
+    setDepartement("");
+    fetchUsers();
   }
 
-  async function deleteUser(id: string) {
-    const { error } = await supabase.from("users_custom").delete().eq("id", id);
-    if (error) console.error("Erreur suppression:", error);
-    else fetchUsers();
+  async function deleteUser(user_id: string) {
+    if (!confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
+
+    const res = await fetch("/api/delete-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert("Erreur suppression: " + data.error);
+      return;
+    }
+
+    fetchUsers();
   }
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Admin - Gestion des utilisateurs</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6 text-center">Administration – Gestion des utilisateurs</h1>
 
-      {/* Formulaire */}
-      <div className="space-y-2 mb-6">
-        <input
-          type="text"
-          placeholder="Nom"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email utilisateur"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-
-        <select
-          value={departement}
-          onChange={(e) => setDepartement(e.target.value)}
-          className="w-full border p-2 rounded"
-        >
-          <option value="">-- Choisir un département --</option>
-          {departements.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-
+      {/* Formulaire ajout utilisateur */}
+      <div className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4">Ajouter un utilisateur</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <input
+            type="text"
+            placeholder="Nom complet"
+            className="p-2 border rounded-lg"
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="p-2 border rounded-lg"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            className="p-2 border rounded-lg"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <select
+            className="p-2 border rounded-lg"
+            value={departement}
+            onChange={(e) => setDepartement(e.target.value)}
+          >
+            <option value="">Choisir un département</option>
+            {departements.map((dep) => (
+              <option key={dep} value={dep}>
+                {dep}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           onClick={addUser}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
-          Ajouter
+          ➕ Ajouter
         </button>
       </div>
 
-      {/* Liste utilisateurs */}
-      <h2 className="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
-      <ul className="space-y-1">
-        {users.map((u) => (
-          <li key={u.id} className="border p-2 rounded flex justify-between">
-            <span>
-              {u.nom} — {u.email} ({u.departement})
-            </span>
-            <button
-              onClick={() => deleteUser(u.id)}
-              className="bg-red-500 text-white px-2 py-1 rounded"
-            >
-              Supprimer
-            </button>
-          </li>
-        ))}
-      </ul>
+      {/* Liste des utilisateurs */}
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-xl font-semibold mb-4">Liste des utilisateurs</h2>
+        {users.length === 0 ? (
+          <p className="text-gray-500">Aucun utilisateur enregistré.</p>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="p-2 border">Nom</th>
+                <th className="p-2 border">Email</th>
+                <th className="p-2 border">Département</th>
+                <th className="p-2 border text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr key={u.user_id} className="border-t">
+                  <td className="p-2 border">{u.nom}</td>
+                  <td className="p-2 border">{u.email}</td>
+                  <td className="p-2 border">{u.departement}</td>
+                  <td className="p-2 border text-center">
+                    <button
+                      onClick={() => deleteUser(u.user_id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition"
+                    >
+                      🗑 Supprimer
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
