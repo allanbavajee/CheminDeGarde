@@ -1,320 +1,226 @@
 /* app/louange/page.tsx : page du département Louange */
 "use client";
-import { useState, useMemo } from "react";
-import { supabase } from "@/lib/supabaseClient";
-
-type Evenement = {
-  titre: string;
-  date: string;
-  nb: number;
-  commentaire: string;
-};
-
-type LouangeForm = {
-  semaine: string;
-  lundi_presence: string;
-  lundi_nombre: number;
-  mardi_presence: string;
-  mardi_nombre: number;
-  repetition_date: string;
-  repetition_nombre: number;
-  repetition_notes: string;
-  adp_nombre: number;
-  adp_commentaire: string;
-  culte_commentaire: string;
-  general_commentaire: string;
-  autres: Evenement[];
-};
+import React, { useState } from "react";
+import { encouragements } from "./encouragements";
 
 export default function LouangePage() {
-  const [formData, setFormData] = useState<LouangeForm>({
+  const [formData, setFormData] = useState({
     semaine: "",
-    lundi_presence: "Non",
-    lundi_nombre: 0,
-    mardi_presence: "Non",
-    mardi_nombre: 0,
-    repetition_date: "",
-    repetition_nombre: 0,
-    repetition_notes: "",
-    adp_nombre: 0,
-    adp_commentaire: "",
-    culte_commentaire: "",
-    general_commentaire: "",
-    autres: [],
+    presence: {
+      lundi: { oui: false, nb: 0 },
+      mardi: { oui: false, nb: 0 },
+    },
+    repetition: { date: "", nb: 0, notes: "" },
+    adp: { nb: 0, commentaire: "" },
+    culte: { nb: 0, commentaire: "" },
+    autres: [{ titre: "", date: "", nb: 0, commentaire: "" }],
   });
 
-  const [message, setMessage] = useState("");
+  // Déterminer la semaine courante (1 à 12)
+  const weekNumber = Math.ceil(new Date().getDate() / 7);
+  const encouragement = encouragements[(weekNumber - 1) % encouragements.length];
 
-  // ✅ Liste des champs obligatoires pour calculer la complétion
-  const requiredFields = [
-    formData.semaine,
-    formData.lundi_presence,
-    formData.mardi_presence,
-    formData.repetition_date,
-    formData.repetition_nombre.toString(),
-    formData.adp_nombre.toString(),
-  ];
-
-  // ✅ Calcul automatique du % de complétion
-  const completion = useMemo(() => {
-    const filled = requiredFields.filter((f) => f && f !== "0").length;
-    return Math.round((filled / requiredFields.length) * 100);
-  }, [formData]);
-
-  // Ajout d’un événement dynamique
-  const ajouterEvenement = () => {
+  // Gestion du formulaire
+  const handleChange = (section: string, field: string, value: any) => {
     setFormData({
       ...formData,
-      autres: [
-        ...formData.autres,
-        { titre: "", date: "", nb: 0, commentaire: "" },
-      ],
+      [section]: { ...formData[section as keyof typeof formData], [field]: value },
     });
   };
 
-  // Mise à jour des champs des événements
-  const handleEvenementChange = (
-    index: number,
-    field: keyof Evenement,
-    value: string | number
-  ) => {
-    const newAutres = [...formData.autres];
-    newAutres[index][field] = value as never;
-    setFormData({ ...formData, autres: newAutres });
+  const handleAutresChange = (index: number, field: string, value: any) => {
+    const updated = [...formData.autres];
+    updated[index][field] = value;
+    setFormData({ ...formData, autres: updated });
   };
 
-  // Soumission du formulaire
-  const handleSubmit = async (e: React.FormEvent) => {
+  const addAutreEvenement = () => {
+    setFormData({
+      ...formData,
+      autres: [...formData.autres, { titre: "", date: "", nb: 0, commentaire: "" }],
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const { error } = await supabase.from("louange_form").insert([formData]);
-
-    if (error) {
-      console.error(error);
-      setMessage("❌ Erreur lors de l’enregistrement.");
-    } else {
-      setMessage("✅ Formulaire enregistré avec succès !");
-    }
+    console.log("✅ Données soumises :", formData);
+    alert("Rapport de Louange soumis avec succès !");
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Rapport Louange</h1>
+    <div className="min-h-screen bg-gray-50 flex justify-center p-6">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">📋 Rapport Louange</h1>
 
-      {/* ✅ Indicateur de complétion */}
-      <div className="mb-4">
-        <p className="font-medium">Progression : {completion}%</p>
-        <div className="w-full bg-gray-200 rounded h-4 mt-1">
-          <div
-            className="bg-green-500 h-4 rounded"
-            style={{ width: `${completion}%` }}
-          ></div>
-        </div>
-      </div>
-
-      {message && <p className="mb-4 text-center">{message}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Semaine */}
-        <div>
-          <label className="block font-medium">Semaine concernée</label>
-          <input
-            type="text"
-            value={formData.semaine}
-            onChange={(e) =>
-              setFormData({ ...formData, semaine: e.target.value })
-            }
-            placeholder="ex: 02/09 au 08/09"
-            className="border p-2 w-full rounded"
-          />
+        {/* Message d’encouragement */}
+        <div className="mb-6 p-4 bg-green-100 rounded-xl shadow">
+          <p className="text-lg font-semibold">💡 Message de la semaine :</p>
+          <p className="italic">"{encouragement.message}"</p>
+          <p className="mt-2 text-sm text-gray-700">📖 {encouragement.verset}</p>
         </div>
 
-        {/* Présence lundi */}
-        <div>
-          <label className="block font-medium">Présence lundi</label>
-          <select
-            value={formData.lundi_presence}
-            onChange={(e) =>
-              setFormData({ ...formData, lundi_presence: e.target.value })
-            }
-            className="border p-2 rounded"
-          >
-            <option>Oui</option>
-            <option>Non</option>
-          </select>
-          <input
-            type="number"
-            value={formData.lundi_nombre}
-            onChange={(e) =>
-              setFormData({ ...formData, lundi_nombre: Number(e.target.value) })
-            }
-            className="border p-2 ml-2 w-24 rounded"
-            placeholder="Nb"
-          />
-        </div>
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Semaine */}
+          <div>
+            <label className="block font-medium mb-1">📆 Semaine concernée</label>
+            <input
+              type="text"
+              value={formData.semaine}
+              onChange={(e) => setFormData({ ...formData, semaine: e.target.value })}
+              className="w-full p-2 border rounded-lg"
+              placeholder="Exemple : du 02/09 au 08/09"
+              required
+            />
+          </div>
 
-        {/* Présence mardi */}
-        <div>
-          <label className="block font-medium">Présence mardi</label>
-          <select
-            value={formData.mardi_presence}
-            onChange={(e) =>
-              setFormData({ ...formData, mardi_presence: e.target.value })
-            }
-            className="border p-2 rounded"
-          >
-            <option>Oui</option>
-            <option>Non</option>
-          </select>
-          <input
-            type="number"
-            value={formData.mardi_nombre}
-            onChange={(e) =>
-              setFormData({ ...formData, mardi_nombre: Number(e.target.value) })
-            }
-            className="border p-2 ml-2 w-24 rounded"
-            placeholder="Nb"
-          />
-        </div>
+          {/* Présence */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {["lundi", "mardi"].map((jour) => (
+              <div key={jour} className="p-4 border rounded-xl">
+                <label className="block font-medium capitalize mb-2">Présence {jour}</label>
+                <select
+                  value={formData.presence[jour as "lundi" | "mardi"].oui ? "oui" : "non"}
+                  onChange={(e) =>
+                    handleChange("presence", jour, {
+                      ...formData.presence[jour as "lundi" | "mardi"],
+                      oui: e.target.value === "oui",
+                    })
+                  }
+                  className="w-full p-2 border rounded-lg mb-2"
+                >
+                  <option value="non">Non</option>
+                  <option value="oui">Oui</option>
+                </select>
+                <input
+                  type="number"
+                  value={formData.presence[jour as "lundi" | "mardi"].nb}
+                  onChange={(e) =>
+                    handleChange("presence", jour, {
+                      ...formData.presence[jour as "lundi" | "mardi"],
+                      nb: Number(e.target.value),
+                    })
+                  }
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Nombre de personnes"
+                />
+              </div>
+            ))}
+          </div>
 
-        {/* Répétition */}
-        <div>
-          <label className="block font-medium">Répétition Louange</label>
-          <input
-            type="date"
-            value={formData.repetition_date}
-            onChange={(e) =>
-              setFormData({ ...formData, repetition_date: e.target.value })
-            }
-            className="border p-2 w-full rounded"
-          />
-          <input
-            type="number"
-            value={formData.repetition_nombre}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                repetition_nombre: Number(e.target.value),
-              })
-            }
-            className="border p-2 w-full mt-2 rounded"
-            placeholder="Nombre présents"
-          />
-          <textarea
-            value={formData.repetition_notes}
-            onChange={(e) =>
-              setFormData({ ...formData, repetition_notes: e.target.value })
-            }
-            className="border p-2 w-full mt-2 rounded"
-            placeholder="Notes / observations"
-          />
-        </div>
+          {/* Répétition */}
+          <div className="p-4 border rounded-xl">
+            <label className="block font-medium mb-2">🎶 Répétition Louange</label>
+            <input
+              type="date"
+              value={formData.repetition.date}
+              onChange={(e) => handleChange("repetition", "date", e.target.value)}
+              className="w-full p-2 border rounded-lg mb-2"
+            />
+            <input
+              type="number"
+              value={formData.repetition.nb}
+              onChange={(e) => handleChange("repetition", "nb", Number(e.target.value))}
+              className="w-full p-2 border rounded-lg mb-2"
+              placeholder="Nombre de présents"
+            />
+            <textarea
+              value={formData.repetition.notes}
+              onChange={(e) => handleChange("repetition", "notes", e.target.value)}
+              className="w-full p-2 border rounded-lg"
+              placeholder="Notes / observations"
+            />
+          </div>
 
-        {/* ADP */}
-        <div>
-          <label className="block font-medium">Présents ADP</label>
-          <input
-            type="number"
-            value={formData.adp_nombre}
-            onChange={(e) =>
-              setFormData({ ...formData, adp_nombre: Number(e.target.value) })
-            }
-            className="border p-2 w-full rounded"
-            placeholder="Nombre de présents"
-          />
-          <textarea
-            value={formData.adp_commentaire}
-            onChange={(e) =>
-              setFormData({ ...formData, adp_commentaire: e.target.value })
-            }
-            className="border p-2 w-full mt-2 rounded"
-            placeholder="Commentaire"
-          />
-        </div>
+          {/* ADP */}
+          <div className="p-4 border rounded-xl">
+            <label className="block font-medium mb-2">🙏 Présents ADP</label>
+            <input
+              type="number"
+              value={formData.adp.nb}
+              onChange={(e) => handleChange("adp", "nb", Number(e.target.value))}
+              className="w-full p-2 border rounded-lg mb-2"
+              placeholder="Nombre de présents"
+            />
+            <textarea
+              value={formData.adp.commentaire}
+              onChange={(e) => handleChange("adp", "commentaire", e.target.value)}
+              className="w-full p-2 border rounded-lg"
+              placeholder="Commentaire"
+            />
+          </div>
 
-        {/* Culte */}
-        <div>
-          <label className="block font-medium">Présents Culte (dimanche)</label>
-          <textarea
-            value={formData.culte_commentaire}
-            onChange={(e) =>
-              setFormData({ ...formData, culte_commentaire: e.target.value })
-            }
-            className="border p-2 w-full rounded"
-            placeholder="Commentaire"
-          />
-        </div>
+          {/* Culte */}
+          <div className="p-4 border rounded-xl">
+            <label className="block font-medium mb-2">⛪ Présents Culte (dimanche)</label>
+            <input
+              type="number"
+              value={formData.culte.nb}
+              onChange={(e) => handleChange("culte", "nb", Number(e.target.value))}
+              className="w-full p-2 border rounded-lg mb-2"
+              placeholder="Nombre de présents"
+            />
+            <textarea
+              value={formData.culte.commentaire}
+              onChange={(e) => handleChange("culte", "commentaire", e.target.value)}
+              className="w-full p-2 border rounded-lg"
+              placeholder="Commentaire"
+            />
+          </div>
 
-        {/* Autres événements */}
-        <div>
-          <label className="block font-medium mb-2">Autres événements</label>
-          {formData.autres.map((ev, index) => (
-            <div key={index} className="border p-3 mb-3 rounded bg-gray-50">
-              <input
-                type="text"
-                placeholder="Titre"
-                value={ev.titre}
-                onChange={(e) =>
-                  handleEvenementChange(index, "titre", e.target.value)
-                }
-                className="border p-2 w-full mb-2 rounded"
-              />
-              <input
-                type="date"
-                value={ev.date}
-                onChange={(e) =>
-                  handleEvenementChange(index, "date", e.target.value)
-                }
-                className="border p-2 w-full mb-2 rounded"
-              />
-              <input
-                type="number"
-                placeholder="Nombre participants"
-                value={ev.nb}
-                onChange={(e) =>
-                  handleEvenementChange(index, "nb", Number(e.target.value))
-                }
-                className="border p-2 w-full mb-2 rounded"
-              />
-              <textarea
-                placeholder="Commentaire"
-                value={ev.commentaire}
-                onChange={(e) =>
-                  handleEvenementChange(index, "commentaire", e.target.value)
-                }
-                className="border p-2 w-full rounded"
-              />
-            </div>
-          ))}
+          {/* Autres événements */}
+          <div className="p-4 border rounded-xl">
+            <label className="block font-medium mb-2">📌 Autres événements</label>
+            {formData.autres.map((ev, i) => (
+              <div key={i} className="mb-4 p-3 border rounded-lg bg-gray-50">
+                <input
+                  type="text"
+                  value={ev.titre}
+                  onChange={(e) => handleAutresChange(i, "titre", e.target.value)}
+                  className="w-full p-2 border rounded-lg mb-2"
+                  placeholder="Titre de l’événement"
+                />
+                <input
+                  type="date"
+                  value={ev.date}
+                  onChange={(e) => handleAutresChange(i, "date", e.target.value)}
+                  className="w-full p-2 border rounded-lg mb-2"
+                />
+                <input
+                  type="number"
+                  value={ev.nb}
+                  onChange={(e) => handleAutresChange(i, "nb", Number(e.target.value))}
+                  className="w-full p-2 border rounded-lg mb-2"
+                  placeholder="Nombre de participants"
+                />
+                <textarea
+                  value={ev.commentaire}
+                  onChange={(e) => handleAutresChange(i, "commentaire", e.target.value)}
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Commentaire"
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addAutreEvenement}
+              className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              + Ajouter un événement
+            </button>
+          </div>
+
+          {/* Soumettre */}
           <button
-            type="button"
-            onClick={ajouterEvenement}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            type="submit"
+            className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
           >
-            ➕ Ajouter un événement
+            ✅ Soumettre le rapport
           </button>
-        </div>
-
-        {/* Commentaire général */}
-        <div>
-          <label className="block font-medium">Commentaire général</label>
-          <textarea
-            value={formData.general_commentaire}
-            onChange={(e) =>
-              setFormData({ ...formData, general_commentaire: e.target.value })
-            }
-            className="border p-2 w-full rounded"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-6 py-2 rounded"
-        >
-          Enregistrer
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
+
 
