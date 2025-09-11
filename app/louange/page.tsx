@@ -1,226 +1,272 @@
 /* app/louange/page.tsx : page du département Louange */
 "use client";
 import React, { useState } from "react";
-import { encouragements } from "@/lib/encouragements";
+import encouragements from "../encouragements";
 
 export default function LouangePage() {
+  // 🔹 Index de la semaine (1 message par semaine)
+  const currentWeek = Math.floor(
+    (new Date().getTime() - new Date("2025-01-01").getTime()) /
+      (7 * 24 * 60 * 60 * 1000)
+  ) % encouragements.length;
+
   const [formData, setFormData] = useState({
     semaine: "",
-    presence: {
-      lundi: { oui: false, nb: 0 },
-      mardi: { oui: false, nb: 0 },
-    },
+    lundi: { present: false, nb: 0 },
+    mardi: { present: false, nb: 0 },
     repetition: { date: "", nb: 0, notes: "" },
     adp: { nb: 0, commentaire: "" },
-    culte: { nb: 0, commentaire: "" },
-    autres: [{ titre: "", date: "", nb: 0, commentaire: "" }],
+    culte: { commentaire: "" },
+    autres: [] as { titre: string; date: string; nb: number; commentaire: string }[],
   });
 
-  // Déterminer la semaine courante (1 à 12)
-  const weekNumber = Math.ceil(new Date().getDate() / 7);
-  const encouragement = encouragements[(weekNumber - 1) % encouragements.length];
+  // ✅ HandleChange corrigé
+  const handleChange = (
+    section: string,
+    field: string,
+    value: string | number | boolean
+  ) => {
+    setFormData((prev) => {
+      const currentSection = prev[section as keyof typeof prev];
 
-  // Gestion du formulaire
-  const handleChange = (section: string, field: string, value: any) => {
-    setFormData({
-      ...formData,
-      [section]: { ...formData[section as keyof typeof formData], [field]: value },
+      if (typeof currentSection === "object" && currentSection !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...(currentSection as Record<string, any>),
+            [field]: value,
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        [section]: value,
+      };
     });
   };
 
-  const handleAutresChange = (index: number, field: string, value: any) => {
-    const updated = [...formData.autres];
-    updated[index][field] = value;
-    setFormData({ ...formData, autres: updated });
-  };
-
-  const addAutreEvenement = () => {
-    setFormData({
-      ...formData,
-      autres: [...formData.autres, { titre: "", date: "", nb: 0, commentaire: "" }],
-    });
+  // Ajouter un autre événement
+  const addEvenement = () => {
+    setFormData((prev) => ({
+      ...prev,
+      autres: [
+        ...prev.autres,
+        { titre: "", date: "", nb: 0, commentaire: "" },
+      ],
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("✅ Données soumises :", formData);
-    alert("Rapport de Louange soumis avec succès !");
+    console.log("Formulaire envoyé ✅", formData);
+    alert("Données envoyées avec succès !");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center p-6">
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">📋 Rapport Louange</h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Espace Louange 🎶</h1>
 
-        {/* Message d’encouragement */}
-        <div className="mb-6 p-4 bg-green-100 rounded-xl shadow">
-          <p className="text-lg font-semibold">💡 Message de la semaine :</p>
-          <p className="italic">"{encouragement.message}"</p>
-          <p className="mt-2 text-sm text-gray-700">📖 {encouragement.verset}</p>
+      {/* 🔹 Message d'encouragement + verset */}
+      <div className="p-4 mb-6 rounded-xl shadow bg-green-100 border-l-4 border-green-500">
+        <p className="font-semibold text-green-800">
+          {encouragements[currentWeek].message}
+        </p>
+        <p className="text-sm text-gray-700 mt-2">
+          <strong>{encouragements[currentWeek].verset}</strong>
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Semaine */}
+        <div>
+          <label className="block font-medium">Semaine concernée</label>
+          <input
+            type="text"
+            value={formData.semaine}
+            onChange={(e) =>
+              handleChange("semaine", "semaine", e.target.value)
+            }
+            className="w-full border p-2 rounded"
+            placeholder="Ex: du 02/09 au 08/09"
+          />
         </div>
 
-        {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Semaine */}
-          <div>
-            <label className="block font-medium mb-1">📆 Semaine concernée</label>
-            <input
-              type="text"
-              value={formData.semaine}
-              onChange={(e) => setFormData({ ...formData, semaine: e.target.value })}
-              className="w-full p-2 border rounded-lg"
-              placeholder="Exemple : du 02/09 au 08/09"
-              required
-            />
-          </div>
+        {/* Présence Lundi */}
+        <div>
+          <label className="block font-medium">Présence Lundi</label>
+          <input
+            type="checkbox"
+            checked={formData.lundi.present}
+            onChange={(e) => handleChange("lundi", "present", e.target.checked)}
+            className="mr-2"
+          />
+          <input
+            type="number"
+            value={formData.lundi.nb}
+            onChange={(e) => handleChange("lundi", "nb", Number(e.target.value))}
+            className="border p-2 rounded w-24"
+            placeholder="Nb"
+          />
+        </div>
 
-          {/* Présence */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {["lundi", "mardi"].map((jour) => (
-              <div key={jour} className="p-4 border rounded-xl">
-                <label className="block font-medium capitalize mb-2">Présence {jour}</label>
-                <select
-                  value={formData.presence[jour as "lundi" | "mardi"].oui ? "oui" : "non"}
-                  onChange={(e) =>
-                    handleChange("presence", jour, {
-                      ...formData.presence[jour as "lundi" | "mardi"],
-                      oui: e.target.value === "oui",
-                    })
-                  }
-                  className="w-full p-2 border rounded-lg mb-2"
-                >
-                  <option value="non">Non</option>
-                  <option value="oui">Oui</option>
-                </select>
-                <input
-                  type="number"
-                  value={formData.presence[jour as "lundi" | "mardi"].nb}
-                  onChange={(e) =>
-                    handleChange("presence", jour, {
-                      ...formData.presence[jour as "lundi" | "mardi"],
-                      nb: Number(e.target.value),
-                    })
-                  }
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Nombre de personnes"
-                />
-              </div>
-            ))}
-          </div>
+        {/* Présence Mardi */}
+        <div>
+          <label className="block font-medium">Présence Mardi</label>
+          <input
+            type="checkbox"
+            checked={formData.mardi.present}
+            onChange={(e) => handleChange("mardi", "present", e.target.checked)}
+            className="mr-2"
+          />
+          <input
+            type="number"
+            value={formData.mardi.nb}
+            onChange={(e) => handleChange("mardi", "nb", Number(e.target.value))}
+            className="border p-2 rounded w-24"
+            placeholder="Nb"
+          />
+        </div>
 
-          {/* Répétition */}
-          <div className="p-4 border rounded-xl">
-            <label className="block font-medium mb-2">🎶 Répétition Louange</label>
-            <input
-              type="date"
-              value={formData.repetition.date}
-              onChange={(e) => handleChange("repetition", "date", e.target.value)}
-              className="w-full p-2 border rounded-lg mb-2"
-            />
-            <input
-              type="number"
-              value={formData.repetition.nb}
-              onChange={(e) => handleChange("repetition", "nb", Number(e.target.value))}
-              className="w-full p-2 border rounded-lg mb-2"
-              placeholder="Nombre de présents"
-            />
-            <textarea
-              value={formData.repetition.notes}
-              onChange={(e) => handleChange("repetition", "notes", e.target.value)}
-              className="w-full p-2 border rounded-lg"
-              placeholder="Notes / observations"
-            />
-          </div>
+        {/* Répétition */}
+        <div>
+          <label className="block font-medium">Répétition Louange</label>
+          <input
+            type="date"
+            value={formData.repetition.date}
+            onChange={(e) =>
+              handleChange("repetition", "date", e.target.value)
+            }
+            className="border p-2 rounded block mb-2"
+          />
+          <input
+            type="number"
+            value={formData.repetition.nb}
+            onChange={(e) =>
+              handleChange("repetition", "nb", Number(e.target.value))
+            }
+            className="border p-2 rounded block mb-2"
+            placeholder="Nombre présents"
+          />
+          <textarea
+            value={formData.repetition.notes}
+            onChange={(e) =>
+              handleChange("repetition", "notes", e.target.value)
+            }
+            className="border p-2 rounded w-full"
+            placeholder="Notes / observations"
+          />
+        </div>
 
-          {/* ADP */}
-          <div className="p-4 border rounded-xl">
-            <label className="block font-medium mb-2">🙏 Présents ADP</label>
-            <input
-              type="number"
-              value={formData.adp.nb}
-              onChange={(e) => handleChange("adp", "nb", Number(e.target.value))}
-              className="w-full p-2 border rounded-lg mb-2"
-              placeholder="Nombre de présents"
-            />
-            <textarea
-              value={formData.adp.commentaire}
-              onChange={(e) => handleChange("adp", "commentaire", e.target.value)}
-              className="w-full p-2 border rounded-lg"
-              placeholder="Commentaire"
-            />
-          </div>
+        {/* ADP */}
+        <div>
+          <label className="block font-medium">Présents ADP</label>
+          <input
+            type="number"
+            value={formData.adp.nb}
+            onChange={(e) => handleChange("adp", "nb", Number(e.target.value))}
+            className="border p-2 rounded block mb-2"
+            placeholder="Nombre présents"
+          />
+          <textarea
+            value={formData.adp.commentaire}
+            onChange={(e) =>
+              handleChange("adp", "commentaire", e.target.value)
+            }
+            className="border p-2 rounded w-full"
+            placeholder="Commentaire"
+          />
+        </div>
 
-          {/* Culte */}
-          <div className="p-4 border rounded-xl">
-            <label className="block font-medium mb-2">⛪ Présents Culte (dimanche)</label>
-            <input
-              type="number"
-              value={formData.culte.nb}
-              onChange={(e) => handleChange("culte", "nb", Number(e.target.value))}
-              className="w-full p-2 border rounded-lg mb-2"
-              placeholder="Nombre de présents"
-            />
-            <textarea
-              value={formData.culte.commentaire}
-              onChange={(e) => handleChange("culte", "commentaire", e.target.value)}
-              className="w-full p-2 border rounded-lg"
-              placeholder="Commentaire"
-            />
-          </div>
+        {/* Culte */}
+        <div>
+          <label className="block font-medium">Présents Culte (dimanche)</label>
+          <textarea
+            value={formData.culte.commentaire}
+            onChange={(e) =>
+              handleChange("culte", "commentaire", e.target.value)
+            }
+            className="border p-2 rounded w-full"
+            placeholder="Commentaire"
+          />
+        </div>
 
-          {/* Autres événements */}
-          <div className="p-4 border rounded-xl">
-            <label className="block font-medium mb-2">📌 Autres événements</label>
-            {formData.autres.map((ev, i) => (
-              <div key={i} className="mb-4 p-3 border rounded-lg bg-gray-50">
-                <input
-                  type="text"
-                  value={ev.titre}
-                  onChange={(e) => handleAutresChange(i, "titre", e.target.value)}
-                  className="w-full p-2 border rounded-lg mb-2"
-                  placeholder="Titre de l’événement"
-                />
-                <input
-                  type="date"
-                  value={ev.date}
-                  onChange={(e) => handleAutresChange(i, "date", e.target.value)}
-                  className="w-full p-2 border rounded-lg mb-2"
-                />
-                <input
-                  type="number"
-                  value={ev.nb}
-                  onChange={(e) => handleAutresChange(i, "nb", Number(e.target.value))}
-                  className="w-full p-2 border rounded-lg mb-2"
-                  placeholder="Nombre de participants"
-                />
-                <textarea
-                  value={ev.commentaire}
-                  onChange={(e) => handleAutresChange(i, "commentaire", e.target.value)}
-                  className="w-full p-2 border rounded-lg"
-                  placeholder="Commentaire"
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addAutreEvenement}
-              className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              + Ajouter un événement
-            </button>
-          </div>
-
-          {/* Soumettre */}
+        {/* Autres événements */}
+        <div>
+          <label className="block font-medium">Autres événements</label>
+          {formData.autres.map((ev, idx) => (
+            <div key={idx} className="p-2 border rounded mb-2">
+              <input
+                type="text"
+                value={ev.titre}
+                onChange={(e) =>
+                  setFormData((prev) => {
+                    const updated = [...prev.autres];
+                    updated[idx].titre = e.target.value;
+                    return { ...prev, autres: updated };
+                  })
+                }
+                placeholder="Titre"
+                className="border p-1 rounded block mb-1 w-full"
+              />
+              <input
+                type="date"
+                value={ev.date}
+                onChange={(e) =>
+                  setFormData((prev) => {
+                    const updated = [...prev.autres];
+                    updated[idx].date = e.target.value;
+                    return { ...prev, autres: updated };
+                  })
+                }
+                className="border p-1 rounded block mb-1"
+              />
+              <input
+                type="number"
+                value={ev.nb}
+                onChange={(e) =>
+                  setFormData((prev) => {
+                    const updated = [...prev.autres];
+                    updated[idx].nb = Number(e.target.value);
+                    return { ...prev, autres: updated };
+                  })
+                }
+                placeholder="Nb"
+                className="border p-1 rounded block mb-1"
+              />
+              <textarea
+                value={ev.commentaire}
+                onChange={(e) =>
+                  setFormData((prev) => {
+                    const updated = [...prev.autres];
+                    updated[idx].commentaire = e.target.value;
+                    return { ...prev, autres: updated };
+                  })
+                }
+                placeholder="Commentaire"
+                className="border p-1 rounded block w-full"
+              />
+            </div>
+          ))}
           <button
-            type="submit"
-            className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            type="button"
+            onClick={addEvenement}
+            className="bg-blue-500 text-white px-3 py-1 rounded"
           >
-            ✅ Soumettre le rapport
+            + Ajouter un événement
           </button>
-        </form>
-      </div>
+        </div>
+
+        <button
+          type="submit"
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Envoyer ✅
+        </button>
+      </form>
     </div>
   );
 }
+
 
 
