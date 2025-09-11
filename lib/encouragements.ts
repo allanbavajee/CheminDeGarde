@@ -1,62 +1,55 @@
-export const encouragements = [
+/* lib/encouragements.ts */
+// 🔹 Liste d’encouragements et versets bibliques (1 par semaine, pour 3 mois)
+
+const encouragements = [
   {
-    semaine: 1,
-    message: "👏 Excellent travail ! Continue de semer avec fidélité.",
-    verset: "1 Corinthiens 15:58 - Soyez fermes, inébranlables, travaillant de mieux en mieux à l'œuvre du Seigneur."
+    message: "Dieu te fortifie pour chaque mission. Continue avec foi et persévérance !",
+    verse: "Philippiens 4:13 — Je puis tout par celui qui me fortifie."
   },
   {
-    semaine: 2,
-    message: "🔥 Ta persévérance fait une différence énorme dans l’équipe.",
-    verset: "Galates 6:9 - Ne nous lassons pas de faire le bien; car nous moissonnerons au temps convenable, si nous ne nous relâchons pas."
+    message: "Ta fidélité dans le service n’est jamais vaine. Dieu voit ton cœur.",
+    verse: "1 Corinthiens 15:58 — Votre travail n’est pas vain dans le Seigneur."
   },
   {
-    semaine: 3,
-    message: "🙌 Ton engagement est précieux aux yeux de Dieu.",
-    verset: "Hébreux 6:10 - Car Dieu n’est pas injuste, pour oublier votre travail et l’amour que vous avez montré pour son nom."
+    message: "Même les petits pas de foi ouvrent la voie aux grandes victoires.",
+    verse: "Matthieu 17:20 — Rien ne vous sera impossible."
   },
   {
-    semaine: 4,
-    message: "🌱 Chaque petite action que tu fais grandit en fruit spirituel.",
-    verset: "Jean 15:16 - Je vous ai choisis, et je vous ai établis, afin que vous alliez, et que vous portiez du fruit."
+    message: "Le Seigneur marche devant toi, ne crains rien.",
+    verse: "Deutéronome 31:8 — L’Éternel marche lui-même devant toi."
   },
   {
-    semaine: 5,
-    message: "💡 Ta constance inspire ton équipe et fortifie l’église.",
-    verset: "Matthieu 5:16 - Que votre lumière luise ainsi devant les hommes."
+    message: "Chaque prière élève ton équipe et attire la gloire de Dieu.",
+    verse: "Jacques 5:16 — La prière fervente du juste a une grande efficacité."
   },
   {
-    semaine: 6,
-    message: "⚔️ Ta prière et ton service sont des armes puissantes.",
-    verset: "Éphésiens 6:18 - Faites en tout temps par l’Esprit toutes sortes de prières et de supplications."
+    message: "Ta louange ouvre le ciel et change les atmosphères.",
+    verse: "Psaume 22:3 — Tu sièges au milieu des louanges d’Israël."
   },
   {
-    semaine: 7,
-    message: "🌊 Même si les défis sont grands, Dieu est ton soutien.",
-    verset: "Ésaïe 41:10 - Ne crains rien, car je suis avec toi; je t’affermis, je viens à ton secours."
+    message: "Dieu renouvelle tes forces chaque jour. Ne t’arrête pas.",
+    verse: "Ésaïe 40:31 — Ils prennent le vol comme les aigles."
   },
   {
-    semaine: 8,
-    message: "💪 Ton obéissance ouvre des portes pour ton équipe.",
-    verset: "Deutéronome 28:2 - Toutes ces bénédictions viendront sur toi, si tu obéis à la voix de l’Éternel."
+    message: "Ton service est un parfum agréable pour le Seigneur.",
+    verse: "Romains 12:1 — Offrez vos corps comme un sacrifice vivant."
   },
   {
-    semaine: 9,
-    message: "🔥 Dieu agit puissamment à travers ta fidélité.",
-    verset: "1 Samuel 12:24 - Servez l’Éternel fidèlement de tout votre cœur."
+    message: "Même dans la faiblesse, la puissance de Dieu se manifeste.",
+    verse: "2 Corinthiens 12:9 — Ma grâce te suffit, car ma puissance s’accomplit dans la faiblesse."
   },
   {
-    semaine: 10,
-    message: "🌟 Tu es une lumière placée par Dieu dans ton département.",
-    verset: "Philippiens 2:15 - Brillez comme des flambeaux dans le monde."
+    message: "Reste fidèle et Dieu ouvrira de nouvelles portes pour ton département.",
+    verse: "Apocalypse 3:8 — J’ai mis devant toi une porte ouverte, que personne ne peut fermer."
   },
   {
-    semaine: 11,
-    message: "🎶 Ton adoration touche le cœur de Dieu et transforme les vies.",
-    verset: "Jean 4:24 - Dieu est Esprit, et il faut que ceux qui l’adorent l’adorent en esprit et en vérité."
+    message: "Chaque sourire, chaque effort, est une semence éternelle.",
+    verse: "Galates 6:9 — Ne nous lassons pas de faire le bien."
   },
   {
-    semaine: 12,
-    message: "🙌 Merci pour ton service fidèle, Dieu prépare une moisson abondante.",
-    verset: "Psaume 126:5 - Ceux qui sèment avec larmes moissonneront avec chants d’allégresse."
-  }
+    message: "L’unité de ton équipe attire une grande bénédiction.",
+    verse: "Psaume 133:1 — Oh ! qu’il est agréable pour des frères d’habiter ensemble !"
+  },
 ];
+
+export default encouragements;
