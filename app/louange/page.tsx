@@ -1,7 +1,7 @@
 /* app/louange/page.tsx : page du département Louange */
 "use client";
 import React, { useState } from "react";
-import encouragements from "../encouragements";
+import encouragements from "@/lib/encouragements";
 
 export default function LouangePage() {
   // 🔹 Index de la semaine (1 message par semaine)
