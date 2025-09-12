@@ -1,5 +1,6 @@
 /* lib/encouragements.ts */
-// 🔹 Liste d’encouragements et versets bibliques (1 par semaine, pour 3 mois)const encouragements = [
+// 🔹 Liste d’encouragements et versets bibliques (1 par semaine, pour 3 mois)
+const encouragements = [
   {
     message: "Dieu est ton refuge et ta force.",
     verse: "Psaume 46:1",
