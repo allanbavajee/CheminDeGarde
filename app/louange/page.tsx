@@ -1,7 +1,14 @@
-/* app/louange/page.tsx : page du département Louange */
-"use client";
+/* app/louange/page.tsx : page du département Louange */"use client";
 import React, { useState } from "react";
 import encouragements from "@/lib/encouragements";
+
+// Fonction utilitaire pour calculer la semaine courante
+function getWeekNumber(date: Date) {
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+  const pastDaysOfYear =
+    (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+}
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
@@ -12,23 +19,9 @@ export default function LouangePage() {
     autres: [],
   });
 
-  const currentWeek = new Date().getWeek?.() ?? 0; // fallback si pas défini
+  const currentWeek = getWeekNumber(new Date());
   const encouragement =
     encouragements[currentWeek % encouragements.length];
-
-  const handleChange = (
-    section: string,
-    field: string,
-    value: string | number
-  ) => {
-    setFormData({
-      ...formData,
-      [section]: {
-        ...(formData as any)[section],
-        [field]: value,
-      },
-    });
-  };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -78,9 +71,7 @@ export default function LouangePage() {
         <h2 className="text-lg font-semibold text-green-800">
           💡 Encouragement de la semaine
         </h2>
-        <p className="mt-2 text-gray-800 italic">
-          "{encouragement.message}"
-        </p>
+        <p className="mt-2 text-gray-800 italic">"{encouragement.message}"</p>
         <p className="text-sm text-gray-700 mt-2">
           <strong>{encouragement.verse}</strong>
         </p>
