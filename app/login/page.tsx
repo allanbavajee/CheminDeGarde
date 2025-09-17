@@ -36,7 +36,7 @@ export default function LoginPage() {
       return;
     }
 
-    const deptPath = userDept.toLowerCase().replace(/\s+/g, "-"); // Louange → louange
+    const deptPath = userDept.toLowerCase().replace(/\s+/g, "-");
     router.push(`/${deptPath}`);
   };
 
@@ -68,4 +68,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
