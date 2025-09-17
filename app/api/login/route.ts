@@ -1,6 +1,6 @@
 /*app/api/login/route.ts*/
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, AdminUserAttributes } from "@supabase/supabase-js";
 
 // Clé service role côté serveur
 const supabase = createClient(
@@ -20,7 +20,10 @@ export async function POST(req: Request) {
 
     if (error) throw error;
 
-    const user = users.find(u => u.email === email);
+    // ⚠️ Typage explicite
+    const user = (users as AdminUserAttributes[]).find(
+      (u) => u.email === email
+    );
     if (!user) throw new Error("Utilisateur introuvable");
 
     // Vérifier que le département est défini
