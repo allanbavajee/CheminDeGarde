@@ -12,9 +12,10 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // 🔹 Lister les utilisateurs et filtrer par email
+    // 🔹 Lister les utilisateurs avec pagination
     const { data: users, error } = await supabase.auth.admin.listUsers({
-      limit: 1000, // Ajuster selon besoin
+      page: 1,
+      perPage: 1000,
     });
 
     if (error) throw error;
@@ -27,8 +28,6 @@ export async function POST(req: Request) {
       throw new Error("Département non attribué, contactez l'admin.");
     }
 
-    // Ici, tu peux vérifier le mot de passe côté client avec signInWithPassword
-    // ou créer une logique serveur si tu veux authentifier directement
     return NextResponse.json({
       success: true,
       user: {
@@ -41,3 +40,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
