@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       throw new Error("Tous les champs sont requis !");
     }
 
-    // 1️⃣ Créer le user dans Supabase Auth
+    // 1️⃣ Création de l’utilisateur dans Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -28,15 +28,15 @@ export async function POST(req: Request) {
     const userId = authData.user?.id;
     if (!userId) throw new Error("Impossible de récupérer l'ID du nouvel utilisateur.");
 
-    // 2️⃣ Insérer dans users_custom
+    // 2️⃣ Insertion dans ta table users_custom (⚠️ pas users)
     const { error: insertError } = await supabase
-      .from("users_custom") // ⚠️ pointé sur users_custom
+      .from("users_custom")
       .insert({
         user_id: userId,
         nom,
         email,
         departement,
-        password, // pour l'instant en clair
+        password, // à chiffrer plus tard
         role: departement === "Admin" ? "admin" : "user",
       });
 
@@ -44,11 +44,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      user: { email, nom, departement, role: departement === "Admin" ? "admin" : "user" },
+      user: { email, nom, departement },
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
 
 
