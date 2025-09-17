@@ -1,11 +1,13 @@
 /* app/login/page.tsx*/
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,27 +23,18 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur inconnue");
 
-      // Redirection selon département
-      if (!data.user.departement) {
-        throw new Error("Département non attribué, contactez l'admin");
-      }
-
-      if (data.user.departement === "Admin") {
-        window.location.href = "/admin";
-      } else if (data.user.departement === "Louange") {
-        window.location.href = "/louange";
-      } else {
-        window.location.href = `/${data.user.departement.toLowerCase()}`;
-      }
+      // 🔹 Redirection selon le département
+      const dept = data.user.departement.toLowerCase().replace(/\s+/g, "-");
+      router.push(`/${dept}`);
     } catch (err: any) {
-      console.log(err);
-      setMessage("❌ " + err.message);
+      setMessage(err.message);
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 border rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center">Connexion</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Connexion</h1>
+
       <form onSubmit={handleLogin} className="space-y-4">
         <input
           type="email"
@@ -66,7 +59,8 @@ export default function LoginPage() {
           Se connecter
         </button>
       </form>
-      {message && <p className="mt-4 text-center">{message}</p>}
+
+      {message && <p className="mt-4 text-center text-red-600">{message}</p>}
     </div>
   );
 }
