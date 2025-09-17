@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Clé service role côté serveur (jamais côté client)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -16,7 +15,7 @@ export async function POST(req: Request) {
       throw new Error("Tous les champs sont requis !");
     }
 
-    // 🔹 1️⃣ Créer le user dans Supabase Auth
+    // 1️⃣ Créer le user dans Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -29,15 +28,15 @@ export async function POST(req: Request) {
     const userId = authData.user?.id;
     if (!userId) throw new Error("Impossible de récupérer l'ID du nouvel utilisateur.");
 
-    // 🔹 2️⃣ Insérer le user dans la table users_custom
+    // 2️⃣ Insérer dans users_custom
     const { error: insertError } = await supabase
-      .from("users_custom")
+      .from("users_custom") // ⚠️ pointé sur users_custom
       .insert({
         user_id: userId,
         nom,
         email,
         departement,
-        password, // idéalement hashé pour plus de sécurité
+        password, // pour l'instant en clair
         role: departement === "Admin" ? "admin" : "user",
       });
 
@@ -51,4 +50,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
 
