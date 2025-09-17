@@ -12,7 +12,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 🔹 Ajouter un utilisateur */}
           <Link
-            href="/admin/users"
+            href="app/admin/page.tsx"
             className="p-6 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
           >
             ➕ Gérer les utilisateurs
