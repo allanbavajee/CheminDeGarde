@@ -1,7 +1,8 @@
+/*app/api/login/route.ts*/
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// On utilise la clé service role côté serveur
+// Clé service role côté serveur
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -11,15 +12,23 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // On se connecte avec la clé service role pour lire user_metadata
-    const { data: userData, error } = await supabase.auth.admin.getUserByEmail(email);
-    if (error || !userData.user) throw new Error("Utilisateur introuvable");
+    // 🔹 Lister les utilisateurs et filtrer par email
+    const { data: users, error } = await supabase.auth.admin.listUsers({
+      limit: 1000, // Ajuster selon besoin
+    });
 
-    const user = userData.user;
+    if (error) throw error;
 
-    // Vérifier le mot de passe manuellement via la table auth.users si nécessaire
-    // Ou utiliser supabase.auth.signInWithPassword côté client après vérification
+    const user = users.find(u => u.email === email);
+    if (!user) throw new Error("Utilisateur introuvable");
 
+    // Vérifier que le département est défini
+    if (!user.user_metadata?.departement) {
+      throw new Error("Département non attribué, contactez l'admin.");
+    }
+
+    // Ici, tu peux vérifier le mot de passe côté client avec signInWithPassword
+    // ou créer une logique serveur si tu veux authentifier directement
     return NextResponse.json({
       success: true,
       user: {
