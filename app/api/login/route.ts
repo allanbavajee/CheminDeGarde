@@ -1,6 +1,6 @@
 /*app/api/login/route.ts*/
 import { NextResponse } from "next/server";
-import { createClient, AdminUserAttributes } from "@supabase/supabase-js";
+import { createClient, User } from "@supabase/supabase-js";
 
 // Clé service role côté serveur
 const supabase = createClient(
@@ -12,18 +12,16 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
-    // 🔹 Lister les utilisateurs avec pagination
-    const { data: users, error } = await supabase.auth.admin.listUsers({
+    // 🔹 Lister les utilisateurs
+    const { data, error } = await supabase.auth.admin.listUsers({
       page: 1,
       perPage: 1000,
     });
 
     if (error) throw error;
 
-    // ⚠️ Typage explicite
-    const user = (users as AdminUserAttributes[]).find(
-      (u) => u.email === email
-    );
+    // 🔹 data.users est un tableau réel
+    const user = data.users.find((u: User) => u.email === email);
     if (!user) throw new Error("Utilisateur introuvable");
 
     // Vérifier que le département est défini
