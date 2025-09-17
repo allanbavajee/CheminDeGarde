@@ -1,60 +1,51 @@
 /* app/login/page.tsx*/
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Clé publique pour le login
-);
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) throw error;
+      const data = await res.json();
 
-      const userDept = data.user?.user_metadata?.departement;
+      if (!res.ok) throw new Error(data.error || "Erreur inconnue");
 
-      if (!userDept) {
-        // ✅ Vérification spéciale admin
-        if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-          router.push("/admin");
-          return;
-        }
+      // 🔹 Redirection selon rôle/département
+      if (data.user.departement === "Admin" || email === "allan@chemin-de-garde.com") {
+        router.push("/admin");
+      } else if (data.user.departement) {
+        router.push(`/${data.user.departement.toLowerCase()}`);
+      } else {
         setMessage("❌ Département non attribué, contactez l'admin.");
-        return;
       }
-
-      // Redirection vers le département
-      const deptPath = userDept.toLowerCase(); // Exemple: "Louange" → "louange"
-      router.push(`/${deptPath}`);
     } catch (err: any) {
-      setMessage("❌ Erreur login : " + err.message);
+      setMessage("❌ " + err.message);
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 border rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">Connexion</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Connexion</h1>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Adresse email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border rounded"
@@ -68,6 +59,7 @@ export default function LoginPage() {
           className="w-full p-2 border rounded"
           required
         />
+
         <button
           type="submit"
           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
