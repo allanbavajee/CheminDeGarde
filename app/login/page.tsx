@@ -23,9 +23,14 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur inconnue");
 
+      const dept = data.user.departement;
+
       // 🔹 Redirection selon le département
-      const dept = data.user.departement.toLowerCase().replace(/\s+/g, "-");
-      router.push(`/${dept}`);
+      if (dept.toLowerCase() === "admin") {
+        router.push("/admin/dashboard"); // dashboard admin
+      } else {
+        router.push(`/${dept.toLowerCase().replace(/\s+/g, "-")}`); // département
+      }
     } catch (err: any) {
       setMessage(err.message);
     }
@@ -64,4 +69,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
