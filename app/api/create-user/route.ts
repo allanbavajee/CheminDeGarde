@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// Supabase côté serveur
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -9,44 +10,29 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
-    const { email, password, nom, departement } = await req.json();
+    const { email, password, nom, departement, role } = await req.json();
 
-    if (!email || !password || !nom || !departement) {
-      throw new Error("Tous les champs sont requis !");
-    }
-
-    // 1️⃣ Création de l’utilisateur dans Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { nom, departement },
-    });
-
-    if (authError) throw authError;
-
-    const userId = authData.user?.id;
-    if (!userId) throw new Error("Impossible de récupérer l'ID du nouvel utilisateur.");
-
-    // 2️⃣ Insertion dans ta table users_custom (⚠️ pas users)
-    const { error: insertError } = await supabase
+    // 🔹 Insérer l'utilisateur dans users_custom
+    const { data, error } = await supabase
       .from("users_custom")
-      .insert({
-        user_id: userId,
-        nom,
-        email,
-        departement,
-        password, // à chiffrer plus tard
-        role: departement === "Admin" ? "admin" : "user",
-      });
+      .insert([
+        {
+          nom,
+          email,
+          departement,
+          password,
+          role: role || "Utilisateur", // par défaut
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
 
-    if (insertError) throw insertError;
+    if (error) throw error;
 
-    return NextResponse.json({
-      success: true,
-      user: { email, nom, departement },
-    });
+    return NextResponse.json({ success: true, user: data });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
