@@ -1,91 +1,48 @@
 "use client";
-import { useState } from "react";
+import Link from "next/link";
 
-export default function AdminPage() {
-  const [email, setEmail] = useState("");
-  const [nom, setNom] = useState("");
-  const [departement, setDepartement] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  const handleAddUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("");
-
-    try {
-      const res = await fetch("/api/create-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, nom, departement }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erreur inconnue");
-
-      setMessage("✅ Utilisateur ajouté avec succès !");
-      setEmail("");
-      setNom("");
-      setDepartement("");
-      setPassword("");
-    } catch (err: any) {
-      setMessage("❌ Erreur ajout: " + err.message);
-    }
-  };
-
+export default function AdminDashboard() {
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 border rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold mb-4 text-center">Admin – Ajouter un utilisateur</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+        <h1 className="text-3xl font-bold text-center mb-8">
+          Tableau de bord – Admin
+        </h1>
 
-      <form onSubmit={handleAddUser} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Nom complet"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Adresse email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-        <select
-          value={departement}
-          onChange={(e) => setDepartement(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">-- Choisir un département --</option>
-          <option value="Louange">Louange</option>
-          <option value="Intercession">Intercession</option>
-          <option value="Impact Junior/Adso">Impact Junior/Adso</option>
-          <option value="Evangelisation">Evangelisation</option>
-          <option value="Cellule">Cellule</option>
-          <option value="Hotesse">Hotesse</option>
-          <option value="Technique/Comm">Technique/Comm</option>
-          <option value="Moderation">Moderation</option>
-          <option value="Compassion">Compassion</option>
-          <option value="Conseiller">Conseiller</option>
-        </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 🔹 Ajouter un utilisateur */}
+          <Link
+            href="/admin"
+            className="p-6 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            ➕ Gérer les utilisateurs
+          </Link>
 
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-          Ajouter
-        </button>
-      </form>
+          {/* 🔹 Voir les stats par département */}
+          <Link
+            href="/admin/stats"
+            className="p-6 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
+          >
+            📊 Statistiques par département
+          </Link>
 
-      {message && <p className="mt-4 text-center">{message}</p>}
+          {/* 🔹 Vue globale */}
+          <Link
+            href="/admin/global"
+            className="p-6 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition"
+          >
+            🌍 Vue globale
+          </Link>
+
+          {/* 🔹 Déconnexion */}
+          <Link
+            href="/logout"
+            className="p-6 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition"
+          >
+            🚪 Déconnexion
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
