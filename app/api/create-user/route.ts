@@ -1,8 +1,8 @@
-/* app/api/create-user/route.ts : API pour ajouter des utilisateurs */
+/* app/api/create-user/route.ts*/
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Clé service role pour créer des comptes (ne jamais mettre côté client)
+// Clé service role pour créer des comptes (serveur uniquement)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -26,3 +26,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+
