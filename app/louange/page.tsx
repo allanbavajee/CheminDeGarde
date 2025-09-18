@@ -1,39 +1,36 @@
 /*app/louange/page.tsx*/
 "use client";
-import React, { useState } from "react";
+
+import { useState } from "react";
 import supabase from "@/lib/supabaseClient";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
-    tempsLundi: false,
-    tempsMardi: false,
+    lundi: false,
+    mardi: false,
     repetition: false,
-    equipeVendredi: false,
-    equipeDimanche: false,
-    equipeEvenement: false,
-    problemes: "",
+    vendredi: false,
+    dimanche: false,
+    evenement: false,
+    probleme: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ✅ handleChange corrigé pour TypeScript
+  // TypeScript-safe handleChange
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name } = e.target;
 
     if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         [name]: e.target.checked,
       }));
-    } else if (
-      e.target instanceof HTMLTextAreaElement ||
-      (e.target instanceof HTMLInputElement &&
-        e.target.type !== "checkbox")
-    ) {
-      setFormData((prev) => ({
+    } else {
+      setFormData(prev => ({
         ...prev,
         [name]: e.target.value,
       }));
@@ -52,13 +49,13 @@ export default function LouangePage() {
     } else {
       setMessage("✅ Rapport enregistré avec succès !");
       setFormData({
-        tempsLundi: false,
-        tempsMardi: false,
+        lundi: false,
+        mardi: false,
         repetition: false,
-        equipeVendredi: false,
-        equipeDimanche: false,
-        equipeEvenement: false,
-        problemes: "",
+        vendredi: false,
+        dimanche: false,
+        evenement: false,
+        probleme: "",
       });
     }
 
@@ -71,18 +68,18 @@ export default function LouangePage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {[
-          { name: "tempsLundi", label: "Temps de prière lundi" },
-          { name: "tempsMardi", label: "Temps de prière mardi" },
+          { name: "lundi", label: "Temps de prière lundi" },
+          { name: "mardi", label: "Temps de prière mardi" },
           { name: "repetition", label: "Répétition" },
-          { name: "equipeVendredi", label: "Équipe présente vendredi" },
-          { name: "equipeDimanche", label: "Équipe présente dimanche" },
-          { name: "equipeEvenement", label: "Équipe présente événement spécial" },
-        ].map((item) => (
+          { name: "vendredi", label: "Équipe présente vendredi" },
+          { name: "dimanche", label: "Équipe présente dimanche" },
+          { name: "evenement", label: "Équipe présente événement spécial" },
+        ].map(item => (
           <label key={item.name} className="flex items-center space-x-2">
             <input
               type="checkbox"
               name={item.name}
-              checked={(formData as any)[item.name]}
+              checked={formData[item.name as keyof typeof formData] as boolean}
               onChange={handleChange}
               className="h-4 w-4"
             />
@@ -91,10 +88,10 @@ export default function LouangePage() {
         ))}
 
         <textarea
-          name="problemes"
+          name="probleme"
           placeholder="Problèmes rencontrés pendant la semaine"
           className="border p-2 w-full rounded"
-          value={formData.problemes}
+          value={formData.probleme}
           onChange={handleChange}
         />
 
@@ -113,4 +110,3 @@ export default function LouangePage() {
     </div>
   );
 }
-
