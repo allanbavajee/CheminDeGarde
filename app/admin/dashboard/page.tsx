@@ -15,7 +15,7 @@ export default function AdminDashboard() {
         </Link>
 
         <Link
-          href="/admin/departements"
+          href="/departments"
           className="p-6 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition text-center"
         >
           📊 Par département
