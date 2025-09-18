@@ -1,81 +1,202 @@
-/* app/louange/page.tsx : page du département Louange */"use client";
-import React, { useState } from "react";
-import encouragements from "@/lib/encouragements";
+/* app/louange/page.tsx*/
+"use client";
 
-// Fonction utilitaire pour calculer la semaine courante
-function getWeekNumber(date: Date) {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear =
-    (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-}
+import { useState } from "react";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
-    chantPrincipal: "",
-    nombreChants: 0,
-    participation: "",
-    atmosphere: "",
-    autres: [],
+    lundi: "",
+    mardi: "",
+    repetition: "",
+    vendredi: "",
+    dimanche: "",
+    evenement: "",
   });
 
-  const currentWeek = getWeekNumber(new Date());
-  const encouragement =
-    encouragements[currentWeek % encouragements.length];
+  const handleChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Données envoyées :", formData);
+    // TODO: connecter à Supabase (insertion dans une table "louange")
+  };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Rapport - Louange</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
 
-      {/* Champs principaux */}
-      <div className="space-y-4">
-        <input
-          type="text"
-          placeholder="Chant principal"
-          className="border p-2 w-full rounded"
-          value={formData.chantPrincipal}
-          onChange={(e) =>
-            setFormData({ ...formData, chantPrincipal: e.target.value })
-          }
-        />
-        <input
-          type="number"
-          placeholder="Nombre de chants"
-          className="border p-2 w-full rounded"
-          value={formData.nombreChants}
-          onChange={(e) =>
-            setFormData({ ...formData, nombreChants: +e.target.value })
-          }
-        />
-        <input
-          type="text"
-          placeholder="Participation de l’assemblée"
-          className="border p-2 w-full rounded"
-          value={formData.participation}
-          onChange={(e) =>
-            setFormData({ ...formData, participation: e.target.value })
-          }
-        />
-        <textarea
-          placeholder="Atmosphère spirituelle"
-          className="border p-2 w-full rounded"
-          value={formData.atmosphere}
-          onChange={(e) =>
-            setFormData({ ...formData, atmosphere: e.target.value })
-          }
-        />
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Temps de prière lundi */}
+        <div>
+          <label className="block font-medium">Temps de prière lundi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="lundi"
+                value="Oui"
+                checked={formData.lundi === "Oui"}
+                onChange={() => handleChange("lundi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="lundi"
+                value="Non"
+                checked={formData.lundi === "Non"}
+                onChange={() => handleChange("lundi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
 
-      {/* Bloc encouragement */}
-      <div className="mt-8 p-4 bg-green-100 border border-green-300 rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-green-800">
-          💡 Encouragement de la semaine
-        </h2>
-        <p className="mt-2 text-gray-800 italic">"{encouragement.message}"</p>
-        <p className="text-sm text-gray-700 mt-2">
-          <strong>{encouragement.verse}</strong>
-        </p>
-      </div>
+        {/* Temps de prière mardi */}
+        <div>
+          <label className="block font-medium">Temps de prière mardi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="mardi"
+                value="Oui"
+                checked={formData.mardi === "Oui"}
+                onChange={() => handleChange("mardi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="mardi"
+                value="Non"
+                checked={formData.mardi === "Non"}
+                onChange={() => handleChange("mardi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Répétition */}
+        <div>
+          <label className="block font-medium">Répétition :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="repetition"
+                value="Oui"
+                checked={formData.repetition === "Oui"}
+                onChange={() => handleChange("repetition", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="repetition"
+                value="Non"
+                checked={formData.repetition === "Non"}
+                onChange={() => handleChange("repetition", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente vendredi */}
+        <div>
+          <label className="block font-medium">Équipe présente vendredi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="vendredi"
+                value="Oui"
+                checked={formData.vendredi === "Oui"}
+                onChange={() => handleChange("vendredi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="vendredi"
+                value="Non"
+                checked={formData.vendredi === "Non"}
+                onChange={() => handleChange("vendredi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente dimanche */}
+        <div>
+          <label className="block font-medium">Équipe présente dimanche :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="dimanche"
+                value="Oui"
+                checked={formData.dimanche === "Oui"}
+                onChange={() => handleChange("dimanche", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="dimanche"
+                value="Non"
+                checked={formData.dimanche === "Non"}
+                onChange={() => handleChange("dimanche", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente événement spécial */}
+        <div>
+          <label className="block font-medium">Équipe présente événement spécial :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="evenement"
+                value="Oui"
+                checked={formData.evenement === "Oui"}
+                onChange={() => handleChange("evenement", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="evenement"
+                value="Non"
+                checked={formData.evenement === "Non"}
+                onChange={() => handleChange("evenement", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Enregistrer
+        </button>
+      </form>
     </div>
   );
 }
