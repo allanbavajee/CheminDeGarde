@@ -24,7 +24,7 @@ export default function IntercessionPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Rapport - Ccompassion
+      <h1 className="text-2xl font-bold mb-4">Rapport - Compassion
 </h1>
 
       <div className="space-y-4">
