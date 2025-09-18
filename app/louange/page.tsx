@@ -1,7 +1,7 @@
 /*app/louange/page.tsx*/
 "use client";
 import React, { useState } from "react";
-import supabase from "@/lib/supabaseClient"; // Assure-toi d'avoir configuré ton client Supabase
+import supabase from "@/lib/supabaseClient";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
@@ -17,7 +17,7 @@ export default function LouangePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ✅ Correction ici
+  // ✅ handleChange corrigé pour TypeScript
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -28,7 +28,11 @@ export default function LouangePage() {
         ...prev,
         [name]: e.target.checked,
       }));
-    } else {
+    } else if (
+      e.target instanceof HTMLTextAreaElement ||
+      (e.target instanceof HTMLInputElement &&
+        e.target.type !== "checkbox")
+    ) {
       setFormData((prev) => ({
         ...prev,
         [name]: e.target.value,
@@ -62,11 +66,10 @@ export default function LouangePage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto bg-white shadow rounded-lg">
       <h1 className="text-2xl font-bold mb-6">Rapport - Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Checkbox */}
         {[
           { name: "tempsLundi", label: "Temps de prière lundi" },
           { name: "tempsMardi", label: "Temps de prière mardi" },
@@ -87,7 +90,6 @@ export default function LouangePage() {
           </label>
         ))}
 
-        {/* Champ libre */}
         <textarea
           name="problemes"
           placeholder="Problèmes rencontrés pendant la semaine"
@@ -96,20 +98,19 @@ export default function LouangePage() {
           onChange={handleChange}
         />
 
-        {/* Bouton */}
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? "Enregistrement..." : "Soumettre le rapport"}
         </button>
       </form>
 
-      {/* Message */}
       {message && (
         <p className="mt-4 text-center font-semibold text-gray-700">{message}</p>
       )}
     </div>
   );
 }
+
