@@ -5,7 +5,7 @@ import Link from "next/link";
 const departments = [
   { name: "Louange", path: "/admin/louange" },
   { name: "Intercession", path: "/admin/intercession" },
-  { name: "Impact Junior/Adso", path: "/admin/impact-junior" },
+  { name: "Impact Junior/Ados", path: "/admin/impact-junior" },
   { name: "Evangelisation", path: "/admin/evangelisation" },
   { name: "Cellule", path: "/admin/cellule" },
   { name: "Hotesse", path: "/admin/hotesse" },
