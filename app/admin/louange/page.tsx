@@ -18,11 +18,13 @@ export default function LouangePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // ✅ Pour les checkbox
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData(prev => ({ ...prev, [name]: checked }));
   };
 
+  // ✅ Pour les textarea
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -34,6 +36,7 @@ export default function LouangePage() {
     setMessage("");
 
     const { error } = await supabase.from("louange").insert([formData]);
+
     if (error) setMessage("❌ Erreur : " + error.message);
     else {
       setMessage("✅ Rapport enregistré !");
