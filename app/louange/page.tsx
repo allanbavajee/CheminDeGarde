@@ -1,90 +1,115 @@
+/*app/louange/page.tsx*/
 "use client";
-
-import { useState } from "react";
+import React, { useState } from "react";
+import supabase from "@/lib/supabaseClient"; // Assure-toi d'avoir configuré ton client Supabase
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
-    lundi: false,
-    mardi: false,
+    tempsLundi: false,
+    tempsMardi: false,
     repetition: false,
-    vendredi: false,
-    dimanche: false,
-    evenement: false,
-    probleme: "",
+    equipeVendredi: false,
+    equipeDimanche: false,
+    equipeEvenement: false,
+    problemes: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, type, checked, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // ✅ Correction ici
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name } = e.target;
+
+    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: e.target.checked,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: e.target.value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    const res = await fetch("/louange/api", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    const { error } = await supabase.from("louange").insert([formData]);
 
-    if (res.ok) {
-      alert("Enregistrement réussi !");
-      setFormData({
-        lundi: false,
-        mardi: false,
-        repetition: false,
-        vendredi: false,
-        dimanche: false,
-        evenement: false,
-        probleme: "",
-      });
+    if (error) {
+      setMessage("❌ Erreur lors de l’enregistrement : " + error.message);
     } else {
-      alert("Erreur lors de l'enregistrement.");
+      setMessage("✅ Rapport enregistré avec succès !");
+      setFormData({
+        tempsLundi: false,
+        tempsMardi: false,
+        repetition: false,
+        equipeVendredi: false,
+        equipeDimanche: false,
+        equipeEvenement: false,
+        problemes: "",
+      });
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Formulaire Louange</h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Rapport - Louange</h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Checkbox */}
         {[
-          { name: "lundi", label: "Temps de prière Lundi" },
-          { name: "mardi", label: "Temps de prière Mardi" },
+          { name: "tempsLundi", label: "Temps de prière lundi" },
+          { name: "tempsMardi", label: "Temps de prière mardi" },
           { name: "repetition", label: "Répétition" },
-          { name: "vendredi", label: "Équipe présente Vendredi" },
-          { name: "dimanche", label: "Équipe présente Dimanche" },
-          { name: "evenement", label: "Équipe présente Évènement spécial" },
-        ].map(({ name, label }) => (
-          <label key={name} className="flex items-center space-x-2">
+          { name: "equipeVendredi", label: "Équipe présente vendredi" },
+          { name: "equipeDimanche", label: "Équipe présente dimanche" },
+          { name: "equipeEvenement", label: "Équipe présente événement spécial" },
+        ].map((item) => (
+          <label key={item.name} className="flex items-center space-x-2">
             <input
               type="checkbox"
-              name={name}
-              checked={formData[name as keyof typeof formData] as boolean}
+              name={item.name}
+              checked={(formData as any)[item.name]}
               onChange={handleChange}
-              className="w-5 h-5 text-blue-600"
+              className="h-4 w-4"
             />
-            <span>{label}</span>
+            <span>{item.label}</span>
           </label>
         ))}
 
+        {/* Champ libre */}
         <textarea
-          name="probleme"
-          value={formData.probleme}
+          name="problemes"
+          placeholder="Problèmes rencontrés pendant la semaine"
+          className="border p-2 w-full rounded"
+          value={formData.problemes}
           onChange={handleChange}
-          placeholder="Problèmes rencontrés..."
-          className="w-full p-2 border rounded-md"
         />
 
+        {/* Bouton */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          Enregistrer
+          {loading ? "Enregistrement..." : "Soumettre le rapport"}
         </button>
       </form>
+
+      {/* Message */}
+      {message && (
+        <p className="mt-4 text-center font-semibold text-gray-700">{message}</p>
+      )}
     </div>
   );
 }
