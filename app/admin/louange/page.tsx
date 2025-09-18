@@ -1,5 +1,4 @@
 /*CheminDeGarde/app/admin/louange/page.tsx*/
-
 "use client";
 
 import { useState } from "react";
@@ -21,9 +20,7 @@ export default function LouangePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Données envoyées :", formData);
 
-    // Exemple d’envoi vers Supabase
     const res = await fetch("/api/louange", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -32,6 +29,15 @@ export default function LouangePage() {
 
     if (res.ok) {
       alert("Rapport enregistré ✅");
+      setFormData({
+        lundi: "",
+        mardi: "",
+        repetition: "",
+        vendredi: "",
+        dimanche: "",
+        evenement: "",
+        probleme: "",
+      });
     } else {
       alert("Erreur lors de l’enregistrement ❌");
     }
@@ -42,7 +48,6 @@ export default function LouangePage() {
       <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Questions Oui/Non */}
         {[
           { name: "lundi", label: "Temps de prière lundi" },
           { name: "mardi", label: "Temps de prière mardi" },
@@ -78,7 +83,6 @@ export default function LouangePage() {
           </div>
         ))}
 
-        {/* Champ libre */}
         <div>
           <label className="block font-medium">Problèmes rencontrés :</label>
           <textarea
@@ -99,3 +103,4 @@ export default function LouangePage() {
     </div>
   );
 }
+
