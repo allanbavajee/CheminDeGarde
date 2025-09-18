@@ -1,51 +1,59 @@
-/*CheminDeGarde/app/admin/louange/page.tsx*/
+/*app/admin/louange/page.tsx*/
 "use client";
 
 import { useState } from "react";
+import supabase from "@/lib/supabaseClient";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
-    lundi: "",
-    mardi: "",
-    repetition: "",
-    vendredi: "",
-    dimanche: "",
-    evenement: "",
+    lundi: false,
+    mardi: false,
+    repetition: false,
+    vendredi: false,
+    dimanche: false,
+    evenement: false,
     probleme: "",
   });
 
-  const handleChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-    const res = await fetch("/api/louange", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    if (res.ok) {
-      alert("Rapport enregistré ✅");
+    const { error } = await supabase.from("louange").insert([formData]);
+    if (error) setMessage("❌ Erreur : " + error.message);
+    else {
+      setMessage("✅ Rapport enregistré !");
       setFormData({
-        lundi: "",
-        mardi: "",
-        repetition: "",
-        vendredi: "",
-        dimanche: "",
-        evenement: "",
+        lundi: false,
+        mardi: false,
+        repetition: false,
+        vendredi: false,
+        dimanche: false,
+        evenement: false,
         probleme: "",
       });
-    } else {
-      alert("Erreur lors de l’enregistrement ❌");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
+    <div className="p-6 max-w-3xl mx-auto bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Rapport - Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {[
@@ -55,52 +63,39 @@ export default function LouangePage() {
           { name: "vendredi", label: "Équipe présente vendredi" },
           { name: "dimanche", label: "Équipe présente dimanche" },
           { name: "evenement", label: "Équipe présente événement spécial" },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="block font-medium">{field.label} :</label>
-            <div className="flex gap-4 mt-2">
-              <label>
-                <input
-                  type="radio"
-                  name={field.name}
-                  value="Oui"
-                  checked={(formData as any)[field.name] === "Oui"}
-                  onChange={() => handleChange(field.name, "Oui")}
-                />{" "}
-                Oui
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name={field.name}
-                  value="Non"
-                  checked={(formData as any)[field.name] === "Non"}
-                  onChange={() => handleChange(field.name, "Non")}
-                />{" "}
-                Non
-              </label>
-            </div>
-          </div>
+        ].map(field => (
+          <label key={field.name} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name={field.name}
+              checked={formData[field.name as keyof typeof formData] as boolean}
+              onChange={handleCheckboxChange}
+              className="h-4 w-4"
+            />
+            <span>{field.label}</span>
+          </label>
         ))}
 
-        <div>
-          <label className="block font-medium">Problèmes rencontrés :</label>
-          <textarea
-            placeholder="Décris les difficultés rencontrées cette semaine..."
-            className="w-full border p-2 rounded mt-2"
-            value={formData.probleme}
-            onChange={(e) => handleChange("probleme", e.target.value)}
-          />
-        </div>
+        <textarea
+          name="probleme"
+          placeholder="Problèmes rencontrés pendant la semaine"
+          className="border p-2 w-full rounded"
+          value={formData.probleme}
+          onChange={handleTextareaChange}
+        />
 
         <button
           type="submit"
-          className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          Enregistrer
+          {loading ? "Enregistrement..." : "Soumettre le rapport"}
         </button>
       </form>
+
+      {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );
 }
+
 
