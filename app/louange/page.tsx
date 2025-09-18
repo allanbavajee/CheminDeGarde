@@ -15,39 +15,26 @@ export default function LouangePage() {
     probleme: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  // ✅ Handler pour les checkbox
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
 
-  // TypeScript-safe handleChange
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name } = e.target;
-
-    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-      setFormData(prev => ({
-        ...prev,
-        [name]: e.target.checked,
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: e.target.value,
-      }));
-    }
+  // ✅ Handler pour le textarea
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
     const { error } = await supabase.from("louange").insert([formData]);
 
     if (error) {
-      setMessage("❌ Erreur lors de l’enregistrement : " + error.message);
+      alert("Erreur : " + error.message);
     } else {
-      setMessage("✅ Rapport enregistré avec succès !");
+      alert("Rapport enregistré ✅");
       setFormData({
         lundi: false,
         mardi: false,
@@ -58,55 +45,45 @@ export default function LouangePage() {
         probleme: "",
       });
     }
-
-    setLoading(false);
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white shadow rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Rapport - Louange</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Rapport Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {[
-          { name: "lundi", label: "Temps de prière lundi" },
-          { name: "mardi", label: "Temps de prière mardi" },
-          { name: "repetition", label: "Répétition" },
-          { name: "vendredi", label: "Équipe présente vendredi" },
-          { name: "dimanche", label: "Équipe présente dimanche" },
-          { name: "evenement", label: "Équipe présente événement spécial" },
-        ].map(item => (
-          <label key={item.name} className="flex items-center space-x-2">
+        {["lundi", "mardi", "repetition", "vendredi", "dimanche", "evenement"].map(key => (
+          <label key={key} className="flex items-center space-x-2">
             <input
               type="checkbox"
-              name={item.name}
-              checked={formData[item.name as keyof typeof formData] as boolean}
-              onChange={handleChange}
+              name={key}
+              checked={formData[key as keyof typeof formData] as boolean}
+              onChange={handleCheckboxChange}
               className="h-4 w-4"
             />
-            <span>{item.label}</span>
+            <span>{key}</span>
           </label>
         ))}
 
-        <textarea
-          name="probleme"
-          placeholder="Problèmes rencontrés pendant la semaine"
-          className="border p-2 w-full rounded"
-          value={formData.probleme}
-          onChange={handleChange}
-        />
+        <div>
+          <label className="block font-medium mb-1">Problèmes rencontrés :</label>
+          <textarea
+            name="probleme"
+            value={formData.probleme}
+            onChange={handleTextareaChange}
+            placeholder="Décris les problèmes rencontrés cette semaine..."
+            className="border p-2 w-full rounded"
+          />
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
-          {loading ? "Enregistrement..." : "Soumettre le rapport"}
+          Enregistrer
         </button>
       </form>
-
-      {message && (
-        <p className="mt-4 text-center font-semibold text-gray-700">{message}</p>
-      )}
     </div>
   );
 }
+
