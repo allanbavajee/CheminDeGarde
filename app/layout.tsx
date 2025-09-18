@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen flex flex-col">
         {/* ✅ Menu global */}
         <nav className="bg-gray-800 text-white p-4 flex gap-6">
-          <Link href="admin/dashboard">Dashboard</Link>
+          <Link href="/dashboard">Dashboard</Link>
           <Link href="/admin">Utilisateurs</Link>
           <Link href="/departments">Départements</Link>
           <Link href="/global">Global</Link>
