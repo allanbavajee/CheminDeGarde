@@ -23,7 +23,7 @@ export default function ImpactJuniorPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Rapport - Impact Junior/Adso</h1>
+      <h1 className="text-2xl font-bold mb-4">Rapport - Impact Junior/Ados</h1>
 
       <div className="space-y-4">
         <input
