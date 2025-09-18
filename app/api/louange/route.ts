@@ -1,9 +1,10 @@
+/*app/api/louange/route.ts*/
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // ⚠️ service_role seulement côté serveur
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ⚠️ service_role uniquement côté serveur
 );
 
 export async function POST(req: Request) {
