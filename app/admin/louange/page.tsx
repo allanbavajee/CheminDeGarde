@@ -1,3 +1,5 @@
+/*CheminDeGarde/app/admin/louange/page.tsx*/
+
 "use client";
 
 import { useState } from "react";
@@ -10,16 +12,29 @@ export default function LouangePage() {
     vendredi: "",
     dimanche: "",
     evenement: "",
+    probleme: "",
   });
 
   const handleChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Données envoyées :", formData);
-    // TODO: connecter à Supabase (insertion dans une table "louange")
+
+    // Exemple d’envoi vers Supabase
+    const res = await fetch("/api/louange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    if (res.ok) {
+      alert("Rapport enregistré ✅");
+    } else {
+      alert("Erreur lors de l’enregistrement ❌");
+    }
   };
 
   return (
@@ -27,166 +42,51 @@ export default function LouangePage() {
       <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Temps de prière lundi */}
-        <div>
-          <label className="block font-medium">Temps de prière lundi :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="lundi"
-                value="Oui"
-                checked={formData.lundi === "Oui"}
-                onChange={() => handleChange("lundi", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="lundi"
-                value="Non"
-                checked={formData.lundi === "Non"}
-                onChange={() => handleChange("lundi", "Non")}
-              />{" "}
-              Non
-            </label>
+        {/* Questions Oui/Non */}
+        {[
+          { name: "lundi", label: "Temps de prière lundi" },
+          { name: "mardi", label: "Temps de prière mardi" },
+          { name: "repetition", label: "Répétition" },
+          { name: "vendredi", label: "Équipe présente vendredi" },
+          { name: "dimanche", label: "Équipe présente dimanche" },
+          { name: "evenement", label: "Équipe présente événement spécial" },
+        ].map((field) => (
+          <div key={field.name}>
+            <label className="block font-medium">{field.label} :</label>
+            <div className="flex gap-4 mt-2">
+              <label>
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Oui"
+                  checked={(formData as any)[field.name] === "Oui"}
+                  onChange={() => handleChange(field.name, "Oui")}
+                />{" "}
+                Oui
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Non"
+                  checked={(formData as any)[field.name] === "Non"}
+                  onChange={() => handleChange(field.name, "Non")}
+                />{" "}
+                Non
+              </label>
+            </div>
           </div>
-        </div>
+        ))}
 
-        {/* Temps de prière mardi */}
+        {/* Champ libre */}
         <div>
-          <label className="block font-medium">Temps de prière mardi :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="mardi"
-                value="Oui"
-                checked={formData.mardi === "Oui"}
-                onChange={() => handleChange("mardi", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="mardi"
-                value="Non"
-                checked={formData.mardi === "Non"}
-                onChange={() => handleChange("mardi", "Non")}
-              />{" "}
-              Non
-            </label>
-          </div>
-        </div>
-
-        {/* Répétition */}
-        <div>
-          <label className="block font-medium">Répétition :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="repetition"
-                value="Oui"
-                checked={formData.repetition === "Oui"}
-                onChange={() => handleChange("repetition", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="repetition"
-                value="Non"
-                checked={formData.repetition === "Non"}
-                onChange={() => handleChange("repetition", "Non")}
-              />{" "}
-              Non
-            </label>
-          </div>
-        </div>
-
-        {/* Équipe présente vendredi */}
-        <div>
-          <label className="block font-medium">Équipe présente vendredi :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="vendredi"
-                value="Oui"
-                checked={formData.vendredi === "Oui"}
-                onChange={() => handleChange("vendredi", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="vendredi"
-                value="Non"
-                checked={formData.vendredi === "Non"}
-                onChange={() => handleChange("vendredi", "Non")}
-              />{" "}
-              Non
-            </label>
-          </div>
-        </div>
-
-        {/* Équipe présente dimanche */}
-        <div>
-          <label className="block font-medium">Équipe présente dimanche :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="dimanche"
-                value="Oui"
-                checked={formData.dimanche === "Oui"}
-                onChange={() => handleChange("dimanche", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="dimanche"
-                value="Non"
-                checked={formData.dimanche === "Non"}
-                onChange={() => handleChange("dimanche", "Non")}
-              />{" "}
-              Non
-            </label>
-          </div>
-        </div>
-
-        {/* Équipe présente événement spécial */}
-        <div>
-          <label className="block font-medium">Équipe présente événement spécial :</label>
-          <div className="flex gap-4 mt-2">
-            <label>
-              <input
-                type="radio"
-                name="evenement"
-                value="Oui"
-                checked={formData.evenement === "Oui"}
-                onChange={() => handleChange("evenement", "Oui")}
-              />{" "}
-              Oui
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="evenement"
-                value="Non"
-                checked={formData.evenement === "Non"}
-                onChange={() => handleChange("evenement", "Non")}
-              />{" "}
-              Non
-            </label>
-          </div>
+          <label className="block font-medium">Problèmes rencontrés :</label>
+          <textarea
+            placeholder="Décris les difficultés rencontrées cette semaine..."
+            className="w-full border p-2 rounded mt-2"
+            value={formData.probleme}
+            onChange={(e) => handleChange("probleme", e.target.value)}
+          />
         </div>
 
         <button
