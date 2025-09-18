@@ -19,7 +19,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Link href="/departments">Départements</Link>
           <Link href="/global">Global</Link>
           <Link href="/logout">Se déconnecter</Link>
-          <Link href="/departments">Départements</Link>
         </nav>
 
         {/* ✅ Contenu des pages */}
