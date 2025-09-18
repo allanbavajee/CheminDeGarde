@@ -1,131 +1,201 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/lib/supabaseClient";
 
-type LouangeReport = {
-  id: number;
-  semaine: string;
-  lundi_presence: string;
-  lundi_nombre: number;
-  mardi_presence: string;
-  mardi_nombre: number;
-  repetition_date: string;
-  repetition_nombre: number;
-  repetition_notes: string;
-  adp_nombre: number;
-  adp_commentaire: string;
-  culte_commentaire: string;
-  general_commentaire: string;
-  autres: any[];
-  created_at: string;
-  user_email: string;
-};
+import { useState } from "react";
 
-export default function AdminLouangePage() {
-  const [reports, setReports] = useState<LouangeReport[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterWeek, setFilterWeek] = useState("");
+export default function LouangePage() {
+  const [formData, setFormData] = useState({
+    lundi: "",
+    mardi: "",
+    repetition: "",
+    vendredi: "",
+    dimanche: "",
+    evenement: "",
+  });
 
-  const fetchReports = async () => {
-    setLoading(true);
-    let query = supabase
-      .from("louange_form")
-      .select("*, user:users_custom(email)")
-      .order("created_at", { ascending: false });
-
-    if (filterWeek) {
-      query = query.eq("semaine", filterWeek);
-    }
-
-    const { data, error } = await query;
-    if (!error && data) {
-      const formatted = data.map((r: any) => ({
-        ...r,
-        user_email: r.user?.email || "Inconnu",
-      }));
-      setReports(formatted);
-    } else {
-      console.error(error);
-    }
-    setLoading(false);
+  const handleChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
   };
 
-  useEffect(() => {
-    fetchReports();
-  }, [filterWeek]);
-
-  const calculateCompletion = (r: LouangeReport) => {
-    const required = [
-      r.semaine,
-      r.lundi_presence,
-      r.mardi_presence,
-      r.repetition_date,
-      r.repetition_nombre?.toString(),
-      r.adp_nombre?.toString(),
-    ];
-    const filled = required.filter((f) => f && f !== "0").length;
-    return Math.round((filled / required.length) * 100);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Données envoyées :", formData);
+    // TODO: connecter à Supabase (insertion dans une table "louange")
   };
-
-  if (loading) return <p className="text-center mt-10">Chargement...</p>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Rapports Louange</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
 
-      <div className="mb-4 flex gap-2 items-center">
-        <label>Semaine:</label>
-        <input
-          type="text"
-          placeholder="ex: 02/09 au 08/09"
-          value={filterWeek}
-          onChange={(e) => setFilterWeek(e.target.value)}
-          className="border p-2 rounded"
-        />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Temps de prière lundi */}
+        <div>
+          <label className="block font-medium">Temps de prière lundi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="lundi"
+                value="Oui"
+                checked={formData.lundi === "Oui"}
+                onChange={() => handleChange("lundi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="lundi"
+                value="Non"
+                checked={formData.lundi === "Non"}
+                onChange={() => handleChange("lundi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Temps de prière mardi */}
+        <div>
+          <label className="block font-medium">Temps de prière mardi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="mardi"
+                value="Oui"
+                checked={formData.mardi === "Oui"}
+                onChange={() => handleChange("mardi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="mardi"
+                value="Non"
+                checked={formData.mardi === "Non"}
+                onChange={() => handleChange("mardi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Répétition */}
+        <div>
+          <label className="block font-medium">Répétition :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="repetition"
+                value="Oui"
+                checked={formData.repetition === "Oui"}
+                onChange={() => handleChange("repetition", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="repetition"
+                value="Non"
+                checked={formData.repetition === "Non"}
+                onChange={() => handleChange("repetition", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente vendredi */}
+        <div>
+          <label className="block font-medium">Équipe présente vendredi :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="vendredi"
+                value="Oui"
+                checked={formData.vendredi === "Oui"}
+                onChange={() => handleChange("vendredi", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="vendredi"
+                value="Non"
+                checked={formData.vendredi === "Non"}
+                onChange={() => handleChange("vendredi", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente dimanche */}
+        <div>
+          <label className="block font-medium">Équipe présente dimanche :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="dimanche"
+                value="Oui"
+                checked={formData.dimanche === "Oui"}
+                onChange={() => handleChange("dimanche", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="dimanche"
+                value="Non"
+                checked={formData.dimanche === "Non"}
+                onChange={() => handleChange("dimanche", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
+        {/* Équipe présente événement spécial */}
+        <div>
+          <label className="block font-medium">Équipe présente événement spécial :</label>
+          <div className="flex gap-4 mt-2">
+            <label>
+              <input
+                type="radio"
+                name="evenement"
+                value="Oui"
+                checked={formData.evenement === "Oui"}
+                onChange={() => handleChange("evenement", "Oui")}
+              />{" "}
+              Oui
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="evenement"
+                value="Non"
+                checked={formData.evenement === "Non"}
+                onChange={() => handleChange("evenement", "Non")}
+              />{" "}
+              Non
+            </label>
+          </div>
+        </div>
+
         <button
-          onClick={fetchReports}
-          className="bg-blue-600 text-white px-3 py-1 rounded"
+          type="submit"
+          className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
         >
-          Filtrer
+          Enregistrer
         </button>
-      </div>
-
-      <table className="w-full border-collapse border">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border px-2 py-1">Utilisateur</th>
-            <th className="border px-2 py-1">Semaine</th>
-            <th className="border px-2 py-1">Lundi</th>
-            <th className="border px-2 py-1">Mardi</th>
-            <th className="border px-2 py-1">Répétition</th>
-            <th className="border px-2 py-1">ADP</th>
-            <th className="border px-2 py-1">Culte</th>
-            <th className="border px-2 py-1">% Complétion</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reports.map((r) => (
-            <tr key={r.id} className="text-center">
-              <td className="border px-2 py-1">{r.user_email}</td>
-              <td className="border px-2 py-1">{r.semaine}</td>
-              <td className="border px-2 py-1">
-                {r.lundi_presence} ({r.lundi_nombre})
-              </td>
-              <td className="border px-2 py-1">
-                {r.mardi_presence} ({r.mardi_nombre})
-              </td>
-              <td className="border px-2 py-1">
-                {r.repetition_date} ({r.repetition_nombre})
-              </td>
-              <td className="border px-2 py-1">
-                {r.adp_nombre} {r.adp_commentaire && `(${r.adp_commentaire})`}
-              </td>
-              <td className="border px-2 py-1">{r.culte_commentaire}</td>
-              <td className="border px-2 py-1">{calculateCompletion(r)}%</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      </form>
     </div>
   );
 }
