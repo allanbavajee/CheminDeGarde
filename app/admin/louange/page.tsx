@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import supabase from "@/lib/supabaseClient";
 import encouragements from "@/lib/encouragements";
+import supabase from "@/lib/supabaseClient";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
