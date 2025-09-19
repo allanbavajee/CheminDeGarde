@@ -1,4 +1,4 @@
-/*app/admin/louange/page.tsx*/
+/* app/louange/page.tsx */
 "use client";
 
 import { useState } from "react";
@@ -6,23 +6,24 @@ import supabase from "@/lib/supabaseClient";
 
 export default function LouangePage() {
   const [formData, setFormData] = useState({
-    lundi: false,
-    mardi: false,
-    repetition: false,
-    vendredi: false,
-    dimanche: false,
-    evenement: false,
-    probleme: "",
+    lundi: "",
+    mardi: "",
+    repetition: "",
+    adp: "",
+    tempsSpecial: "",
+    remarques: "",
   });
 
-  // ✅ Handler pour les checkbox
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
+  const handleRadioChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handler pour le textarea
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextareaChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -30,41 +31,80 @@ export default function LouangePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.from("louange").insert([formData]);
-    if (error) alert("Erreur : " + error.message);
-    else {
+
+    if (error) {
+      alert("Erreur : " + error.message);
+    } else {
       alert("Rapport enregistré ✅");
       setFormData({
-        lundi: false,
-        mardi: false,
-        repetition: false,
-        vendredi: false,
-        dimanche: false,
-        evenement: false,
-        probleme: "",
+        lundi: "",
+        mardi: "",
+        repetition: "",
+        adp: "",
+        tempsSpecial: "",
+        remarques: "",
       });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {["lundi", "mardi", "repetition", "vendredi", "dimanche", "evenement"].map(key => (
-        <label key={key} className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name={key}
-            checked={formData[key as keyof typeof formData] as boolean}
-            onChange={handleCheckboxChange}
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Rapport Louange</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+
+        {[
+          { name: "lundi", label: "Temps de prière (Lundi)" },
+          { name: "mardi", label: "Temps de prière (Mardi)" },
+          { name: "repetition", label: "Répétition effectuée" },
+          { name: "adp", label: "Présence à l’ADP" },
+          { name: "tempsSpecial", label: "Présence lors d’un temps spécial" },
+        ].map(field => (
+          <div key={field.name}>
+            <p className="font-medium mb-1">{field.label}</p>
+            <div className="flex gap-4">
+              <label>
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Oui"
+                  checked={formData[field.name as keyof typeof formData] === "Oui"}
+                  onChange={handleRadioChange}
+                />{" "}
+                Oui
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Non"
+                  checked={formData[field.name as keyof typeof formData] === "Non"}
+                  onChange={handleRadioChange}
+                />{" "}
+                Non
+              </label>
+            </div>
+          </div>
+        ))}
+
+        <div>
+          <label className="block font-medium mb-1">Remarques :</label>
+          <textarea
+            name="remarques"
+            value={formData.remarques}
+            onChange={handleTextareaChange}
+            placeholder="Écris ici tes remarques..."
+            className="border p-2 w-full rounded"
           />
-          <span>{key}</span>
-        </label>
-      ))}
-      <textarea
-        name="probleme"
-        value={formData.probleme}
-        onChange={handleTextareaChange}
-        placeholder="Problèmes rencontrés"
-      />
-      <button type="submit">Enregistrer</button>
-    </form>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          Enregistrer
+        </button>
+      </form>
+    </div>
   );
 }
