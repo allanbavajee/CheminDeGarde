@@ -1,7 +1,7 @@
 /*app/louange/page.tsx*/
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 type FormState = {
   lundi: string;
@@ -23,6 +23,7 @@ export default function LouangePage() {
     evenement: "",
     probleme: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -32,8 +33,7 @@ export default function LouangePage() {
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, probleme: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,40 +70,41 @@ export default function LouangePage() {
     }
   };
 
+  const questions = [
+    { name: "lundi", label: "Temps de prière lundi" },
+    { name: "mardi", label: "Temps de prière mardi" },
+    { name: "repetition", label: "Répétition" },
+    { name: "vendredi", label: "Équipe présente vendredi" },
+    { name: "dimanche", label: "Équipe présente dimanche" },
+    { name: "evenement", label: "Équipe présente événement spécial" },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
+      <h1 className="text-2xl font-bold mb-6">Rapport Louange</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {[
-          { name: "lundi", label: "Temps de prière lundi" },
-          { name: "mardi", label: "Temps de prière mardi" },
-          { name: "repetition", label: "Répétition" },
-          { name: "vendredi", label: "Équipe présente vendredi" },
-          { name: "dimanche", label: "Équipe présente dimanche" },
-          { name: "evenement", label: "Équipe présente événement spécial" },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="block font-medium mb-2">{field.label} :</label>
-            <div className="flex items-center gap-6">
+        {questions.map((q) => (
+          <div key={q.name}>
+            <label className="block font-medium mb-2">{q.label} :</label>
+            <div className="flex gap-6">
               <label className="inline-flex items-center gap-2">
                 <input
                   type="radio"
-                  name={field.name}
+                  name={q.name}
                   value="Oui"
-                  checked={formData[field.name as keyof FormState] === "Oui"}
+                  checked={formData[q.name as keyof FormState] === "Oui"}
                   onChange={handleRadioChange}
                   className="h-4 w-4"
                 />
                 <span>Oui</span>
               </label>
-
               <label className="inline-flex items-center gap-2">
                 <input
                   type="radio"
-                  name={field.name}
+                  name={q.name}
                   value="Non"
-                  checked={formData[field.name as keyof FormState] === "Non"}
+                  checked={formData[q.name as keyof FormState] === "Non"}
                   onChange={handleRadioChange}
                   className="h-4 w-4"
                 />
@@ -134,11 +135,9 @@ export default function LouangePage() {
 
         {message && (
           <p
-            className={
-              message.startsWith("✅")
-                ? "mt-4 text-center text-green-700 font-semibold"
-                : "mt-4 text-center text-red-600 font-semibold"
-            }
+            className={`mt-4 text-center font-semibold ${
+              message.startsWith("✅") ? "text-green-700" : "text-red-600"
+            }`}
           >
             {message}
           </p>
@@ -147,3 +146,4 @@ export default function LouangePage() {
     </div>
   );
 }
+
