@@ -1,11 +1,9 @@
-/* lib/supabaseClient.ts : centralise la connexion à Supabase pour tout le projet */
+/* lib/supabaseClient.ts */
 import { createClient } from "@supabase/supabase-js";
 
-// ⚠️ On utilise les variables d'environnement côté client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-// ✅ Création du client Supabase
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default supabase;
+export default supabase;   // ✅ export par défaut
