@@ -1,6 +1,6 @@
 /* app/missions/page.tsx */
 import { useEffect, useState } from "react";
-import supabase from "../../lib/supabaseClient";   // ✅ import par défaut
+import supabase from "@/lib/supabaseClient";   // ✅ avec alias @
 import { useRouter } from "next/navigation";
 
 export default function MissionsPage() {
@@ -11,20 +11,21 @@ export default function MissionsPage() {
     const fetchMissions = async () => {
       const { data, error } = await supabase.from("missions").select("*");
       if (error) {
-        console.error("Erreur récupération missions:", error.message);
+        console.error("Erreur Supabase:", error);
       } else {
         setMissions(data || []);
       }
     };
+
     fetchMissions();
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Missions</h1>
-      <ul className="list-disc pl-6">
+    <div>
+      <h1>Liste des Missions</h1>
+      <ul>
         {missions.map((mission) => (
-          <li key={mission.id}>{mission.titre}</li>
+          <li key={mission.id}>{mission.nom}</li>
         ))}
       </ul>
     </div>
