@@ -1,89 +1,149 @@
 /*app/louange/page.tsx*/
 "use client";
 
-import { useState } from "react";
-import supabase from "@/lib/supabaseClient";
+import React, { useState } from "react";
+
+type FormState = {
+  lundi: string;
+  mardi: string;
+  repetition: string;
+  vendredi: string;
+  dimanche: string;
+  evenement: string;
+  probleme: string;
+};
 
 export default function LouangePage() {
-  const [formData, setFormData] = useState({
-    lundi: false,
-    mardi: false,
-    repetition: false,
-    vendredi: false,
-    dimanche: false,
-    evenement: false,
+  const [formData, setFormData] = useState<FormState>({
+    lundi: "",
+    mardi: "",
+    repetition: "",
+    vendredi: "",
+    dimanche: "",
+    evenement: "",
     probleme: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // ✅ Handler pour les checkbox
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
+  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handler pour le textarea
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("louange").insert([formData]);
+    setLoading(true);
+    setMessage(null);
 
-    if (error) {
-      alert("Erreur : " + error.message);
-    } else {
-      alert("Rapport enregistré ✅");
+    try {
+      const res = await fetch("/api/louange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "Erreur lors de l'enregistrement");
+      }
+
+      setMessage("✅ Rapport enregistré avec succès !");
       setFormData({
-        lundi: false,
-        mardi: false,
-        repetition: false,
-        vendredi: false,
-        dimanche: false,
-        evenement: false,
+        lundi: "",
+        mardi: "",
+        repetition: "",
+        vendredi: "",
+        dimanche: "",
+        evenement: "",
         probleme: "",
       });
+    } catch (err: any) {
+      setMessage("❌ " + (err.message || "Erreur inconnue"));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
-      <h1 className="text-2xl font-bold mb-6">Rapport Louange</h1>
+      <h1 className="text-2xl font-bold mb-6">Suivi - Louange</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {["lundi", "mardi", "repetition", "vendredi", "dimanche", "evenement"].map(key => (
-          <label key={key} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name={key}
-              checked={formData[key as keyof typeof formData] as boolean}
-              onChange={handleCheckboxChange}
-              className="h-4 w-4"
-            />
-            <span>{key}</span>
-          </label>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {[
+          { name: "lundi", label: "Temps de prière lundi" },
+          { name: "mardi", label: "Temps de prière mardi" },
+          { name: "repetition", label: "Répétition" },
+          { name: "vendredi", label: "Équipe présente vendredi" },
+          { name: "dimanche", label: "Équipe présente dimanche" },
+          { name: "evenement", label: "Équipe présente événement spécial" },
+        ].map((field) => (
+          <div key={field.name}>
+            <label className="block font-medium mb-2">{field.label} :</label>
+            <div className="flex items-center gap-6">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Oui"
+                  checked={formData[field.name as keyof FormState] === "Oui"}
+                  onChange={handleRadioChange}
+                  className="h-4 w-4"
+                />
+                <span>Oui</span>
+              </label>
+
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name={field.name}
+                  value="Non"
+                  checked={formData[field.name as keyof FormState] === "Non"}
+                  onChange={handleRadioChange}
+                  className="h-4 w-4"
+                />
+                <span>Non</span>
+              </label>
+            </div>
+          </div>
         ))}
 
         <div>
-          <label className="block font-medium mb-1">Problèmes rencontrés :</label>
+          <label className="block font-medium mb-2">Problèmes rencontrés :</label>
           <textarea
             name="probleme"
             value={formData.probleme}
             onChange={handleTextareaChange}
-            placeholder="Décris les problèmes rencontrés cette semaine..."
-            className="border p-2 w-full rounded"
+            placeholder="Décris les difficultés rencontrées cette semaine..."
+            className="w-full border p-2 rounded min-h-[100px]"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          Enregistrer
+          {loading ? "Enregistrement..." : "Enregistrer"}
         </button>
+
+        {message && (
+          <p
+            className={
+              message.startsWith("✅")
+                ? "mt-4 text-center text-green-700 font-semibold"
+                : "mt-4 text-center text-red-600 font-semibold"
+            }
+          >
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );
 }
-
