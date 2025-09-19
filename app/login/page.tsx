@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       // 🔹 Redirection selon le département
       if (dept.toLowerCase() === "admin") {
-        router.push("/admin/dashboard"); // dashboard admin
+        router.push("/dashboard"); // dashboard admin
       } else {
         router.push(`/${dept.toLowerCase().replace(/\s+/g, "-")}`); // département
       }
